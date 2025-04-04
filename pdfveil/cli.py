@@ -17,12 +17,14 @@ def run_cli():
     encrypt_parser.add_argument("inputpdf", help="入力PDFファイルパス")
     encrypt_parser.add_argument("-p" ,"--password", help="暗号化に使うパスワード")
     encrypt_parser.add_argument("-o" ,"--output", help="保存先ファイル名（省略時: .veil.pdf）")
+    encrypt_parser.add_argument("-f", "--force", action="store_true", help="既存ファイルを強制上書きする")
 
     # 復号コマンド
     decrypt_parser = subparsers.add_parser("decrypt", aliases=["dec"], help="PDFを復号する")
     decrypt_parser.add_argument("veilpdf", help="暗号化されたファイル（.veil.pdf）")
     decrypt_parser.add_argument("-p", "--password", help="復号に使うパスワード")
     decrypt_parser.add_argument("-o" ,"--output", help="保存先ファイル名（省略時: .decrypted.pdf）")
+    decrypt_parser.add_argument("-f", "--force", action="store_true", help="既存ファイルを強制上書きする")
 
     args = parser.parse_args()
     
@@ -32,6 +34,6 @@ def run_cli():
 
     # サブコマンド実行
     if args.command in ["encrypt", "enc"]:
-        encrypt_pdf(args.inputpdf, args.password, args.output)
+        encrypt_pdf(args.inputpdf, args.password, args.output, args.force)
     elif args.command in ["decrypt", "dec"]:
-        decrypt_pdf(args.veilpdf, args.password, args.output)
+        decrypt_pdf(args.veilpdf, args.password, args.output, args.force)

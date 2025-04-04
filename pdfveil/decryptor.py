@@ -14,7 +14,7 @@ def is_valid_pdf(file_path: str) -> bool:
     except Exception:
         return False
 
-def decrypt_pdf(input_path: str, password: str, output_path: str = None):
+def decrypt_pdf(input_path: str, password: str, output_path: str = None, force: bool = False):
     """AES-GCMで暗号化されたPDFを復号して保存"""
     
     # 0. 入力ファイルの拡張子チェック
@@ -55,6 +55,10 @@ def decrypt_pdf(input_path: str, password: str, output_path: str = None):
             output_path = input_path.replace(".veil.pdf", ".decrypted.pdf")
         else:
             output_path = input_path + ".decrypted.pdf"
+    
+    if os.path.exists(output_path) and not force:
+        print(f"[!] 出力先ファイル '{output_path}' は既に存在します。--force を指定して上書きできます。")
+        return
 
     with open(output_path, "wb") as f:
         f.write(decrypted_data)
