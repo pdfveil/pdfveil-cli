@@ -37,38 +37,42 @@ def run_cli():
     # pdfveil/cli.py
 import argparse
 import getpass
+from colorama import init, Fore
 from .encryptor import encrypt_pdf
 from .decryptor import decrypt_pdf
 from . import __version__
 from .logo import ASCII_LOGO
 
+# 初期化
+init(autoreset=True)
+
 def run_cli():
     # ArgumentParserの設定
     parser = argparse.ArgumentParser(
         prog="pdfveil",
-        description="🔐 PDFをAES-GCMで安全に暗号化・復号するCLIツール",
+        description=Fore.CYAN + "🔐 PDFをAES-GCMで安全に暗号化・復号するCLIツール" + Fore.RESET,
         formatter_class=argparse.RawTextHelpFormatter,  # より読みやすいヘルプ表示
     )
     
     # --version フラグ
-    parser.add_argument("--version", action="store_true", help="バージョン情報を表示")
+    parser.add_argument("--version", action="store_true", help=Fore.GREEN + "バージョン情報を表示" + Fore.RESET)
     
     # サブコマンドの設定
-    subparsers = parser.add_subparsers(dest="command")
+    subparsers = parser.add_subparsers(dest="command", required=True)
 
     # 暗号化コマンド
-    encrypt_parser = subparsers.add_parser("encrypt", aliases=["enc"], help="PDFを暗号化する")
-    encrypt_parser.add_argument("inputpdf", help="入力PDFファイルパス")
-    encrypt_parser.add_argument("-p" ,"--password", help="暗号化に使うパスワード")
-    encrypt_parser.add_argument("-o" ,"--output", help="保存先ファイル名（省略時: .veil.pdf）")
-    encrypt_parser.add_argument("-f", "--force", action="store_true", help="既存ファイルを強制上書きする")
+    encrypt_parser = subparsers.add_parser("encrypt", aliases=["enc"], help=Fore.YELLOW + "PDFを暗号化する" + Fore.RESET)
+    encrypt_parser.add_argument("inputpdf", help=Fore.YELLOW + "入力PDFファイルパス" + Fore.RESET)
+    encrypt_parser.add_argument("-p" ,"--password", help=Fore.YELLOW + "暗号化に使うパスワード" + Fore.RESET)
+    encrypt_parser.add_argument("-o" ,"--output", help=Fore.YELLOW + "保存先ファイル名（省略時: .veil.pdf）" + Fore.RESET)
+    encrypt_parser.add_argument("-f", "--force", action="store_true", help=Fore.YELLOW + "既存ファイルを強制上書きする" + Fore.RESET)
 
     # 復号コマンド
-    decrypt_parser = subparsers.add_parser("decrypt", aliases=["dec"], help="PDFを復号する")
-    decrypt_parser.add_argument("veilpdf", help="暗号化されたファイル（.veil.pdf）")
-    decrypt_parser.add_argument("-p", "--password", help="復号に使うパスワード")
-    decrypt_parser.add_argument("-o" ,"--output", help="保存先ファイル名（省略時: .decrypted.pdf）")
-    decrypt_parser.add_argument("-f", "--force", action="store_true", help="既存ファイルを強制上書きする")
+    decrypt_parser = subparsers.add_parser("decrypt", aliases=["dec"], help=Fore.YELLOW + "PDFを復号する" + Fore.RESET)
+    decrypt_parser.add_argument("veilpdf", help=Fore.YELLOW + "暗号化されたファイル（.veil.pdf）" + Fore.RESET)
+    decrypt_parser.add_argument("-p", "--password", help=Fore.YELLOW + "復号に使うパスワード" + Fore.RESET)
+    decrypt_parser.add_argument("-o" ,"--output", help=Fore.YELLOW + "保存先ファイル名（省略時: .decrypted.pdf）" + Fore.RESET)
+    decrypt_parser.add_argument("-f", "--force", action="store_true", help=Fore.YELLOW + "既存ファイルを強制上書きする" + Fore.RESET)
 
     
     # 最初に引数を解析
