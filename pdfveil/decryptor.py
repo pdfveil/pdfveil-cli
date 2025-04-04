@@ -2,9 +2,15 @@
 # pdfveil/decryptor.py
 from .utils import derive_key
 from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
+import sys
 
 def decrypt_pdf(input_path: str, password: str, output_path: str = None):
     """AES-GCMで暗号化されたPDFを復号して保存"""
+    
+    # 0. 入力ファイルの拡張子チェック
+    if not input_path.lower().endswith(".pdf"):
+        print(f"[!] 入力ファイルはPDF (.pdf) 形式である必要があります。")
+        sys.exit(1)
 
     # 1. 暗号化されたファイルを読み込み
     with open(input_path, "rb") as f:
