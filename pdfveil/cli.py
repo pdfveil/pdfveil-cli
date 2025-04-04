@@ -1,5 +1,6 @@
 # pdfveil/cli.py
 import argparse
+import getpass
 from .encryptor import encrypt_pdf
 from .decryptor import decrypt_pdf
 
@@ -14,19 +15,23 @@ def run_cli():
     # 暗号化コマンド
     encrypt_parser = subparsers.add_parser("encrypt", aliases=["enc"], help="PDFを暗号化する")
     encrypt_parser.add_argument("inputpdf", help="入力PDFファイルパス")
-    encrypt_parser.add_argument("-p" ,"--password", required=True, help="暗号化に使うパスワード")
+    encrypt_parser.add_argument("-p" ,"--password", help="暗号化に使うパスワード")
     encrypt_parser.add_argument("-o" ,"--output", help="保存先ファイル名（省略時: .veil.pdf）")
 
     # 復号コマンド
-    decrypt_parser = subparsers.add_parser("decrypt", aliases=["enc"], help="PDFを復号する")
+    decrypt_parser = subparsers.add_parser("decrypt", aliases=["dec"], help="PDFを復号する")
     decrypt_parser.add_argument("veilpdf", help="暗号化されたファイル（.veil.pdf）")
-    decrypt_parser.add_argument("-p", "--password", required=True, help="復号に使うパスワード")
+    decrypt_parser.add_argument("-p", "--password", help="復号に使うパスワード")
     decrypt_parser.add_argument("-o" ,"--output", help="保存先ファイル名（省略時: .decrypted.pdf）")
 
     args = parser.parse_args()
+    
+    # 対話式パスワード入力（-pが省略されたら）
+    if not args.password:
+        args.password = getpass.getpass("🔑 Enter password: ")
 
     # サブコマンド実行
-    if args.command == "encrypt":
-        encrypt_pdf(args.input, args.password, args.output)
-    elif args.command == "decrypt":
-        decrypt_pdf(args.input, args.password, args.output)
+    if args.command in ["encrypt", "enc"]:
+        encrypt_pdf(args.inputpdf, args.password, args.output)
+    elif args.command in ["decrypt", "dec"]:
+        decrypt_pdf(args.veilpdf, args.password, args.output)
