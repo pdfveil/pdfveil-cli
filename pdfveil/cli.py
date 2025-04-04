@@ -1,6 +1,7 @@
 # pdfveil/cli.py
 import argparse
 import getpass
+import glob
 from colorama import init, Fore
 from .encryptor import encrypt_pdf
 from .decryptor import decrypt_pdf
@@ -9,6 +10,13 @@ from .logo import ASCII_LOGO
 
 # 初期化
 init(autoreset=True)
+
+def process_files(files, password, mode, force):
+    for file in files:
+        if mode == 'encrypt' or mode == 'enc':
+            encrypt_pdf(file, password, force=force)
+        elif mode == 'decrypt' or mode == 'dec':
+            decrypt_pdf(file, password, force=force)
 
 def run_cli():
     # ArgumentParserの設定
@@ -26,14 +34,14 @@ def run_cli():
 
     # 暗号化コマンド
     encrypt_parser = subparsers.add_parser("encrypt", aliases=["enc"], help=Fore.YELLOW + "PDFを暗号化する" + Fore.RESET)
-    encrypt_parser.add_argument("inputpdf", help=Fore.YELLOW + "入力PDFファイルパス" + Fore.RESET)
+    encrypt_parser.add_argument("inputpdf", help=Fore.YELLOW + "入力PDFファイルパス (複数指定可能、ワイルドカードも対応)" + Fore.RESET, nargs='+')
     encrypt_parser.add_argument("-p" ,"--password", help=Fore.YELLOW + "暗号化に使うパスワード" + Fore.RESET)
     encrypt_parser.add_argument("-o" ,"--output", help=Fore.YELLOW + "保存先ファイル名（省略時: .veil.pdf）" + Fore.RESET)
     encrypt_parser.add_argument("-f", "--force", action="store_true", help=Fore.YELLOW + "既存ファイルを強制上書きする" + Fore.RESET)
 
     # 復号コマンド
     decrypt_parser = subparsers.add_parser("decrypt", aliases=["dec"], help=Fore.YELLOW + "PDFを復号する" + Fore.RESET)
-    decrypt_parser.add_argument("veilpdf", help=Fore.YELLOW + "暗号化されたファイル（.veil.pdf）" + Fore.RESET)
+    decrypt_parser.add_argument("veilpdf", help=Fore.YELLOW + "暗号化されたファイル（.veil.pdf）" + Fore.RESET, nargs='+')
     decrypt_parser.add_argument("-p", "--password", help=Fore.YELLOW + "復号に使うパスワード" + Fore.RESET)
     decrypt_parser.add_argument("-o" ,"--output", help=Fore.YELLOW + "保存先ファイル名（省略時: .decrypted.pdf）" + Fore.RESET)
     decrypt_parser.add_argument("-f", "--force", action="store_true", help=Fore.YELLOW + "既存ファイルを強制上書きする" + Fore.RESET)
@@ -60,8 +68,17 @@ def run_cli():
     if not args.password:
         args.password = getpass.getpass("🔑 Enter password: ")
 
+    # ワイルドカードによる複数ファイルを処理
+    all_files = []
+    for file in args.inputpdf if args.command in ["encrypt", "enc"] else args.veilpdf:
+        all_files.extend(glob.glob(file))
+
+    if not all_files:
+        print(f"[!] 指定されたファイルが見つかりません。")
+        exit(1)
+    
     # サブコマンド実行
     if args.command in ["encrypt", "enc"]:
-        encrypt_pdf(args.inputpdf, args.password, args.output, args.force)
+        process_files(all_files, args.password, "encrypt", args.force)
     elif args.command in ["decrypt", "dec"]:
-        decrypt_pdf(args.veilpdf, args.password, args.output, args.force)
+        process_files(all_files, args.password, "decrypt", args.force)
