@@ -17,7 +17,7 @@ def encrypt_pdf(input_path: str, password: str, output_path: str = None, force: 
 
     # 2. ソルト & 鍵生成
     salt = generate_salt()
-    key = derive_key(password, salt)
+    key = derive_key(password, salt, mode='enc')
 
     # 3. IV生成（GCM推奨：12バイト）
     iv = os.urandom(12)

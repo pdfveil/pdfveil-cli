@@ -33,7 +33,7 @@ def decrypt_pdf(input_path: str, password: str, output_path: str = None, force: 
     ciphertext = encrypted_data[28:-16]
 
     # 3. 鍵を導出
-    key = derive_key(password, salt)
+    key = derive_key(password, salt, mode='dec')
 
     # 4. AES-GCMで復号
     cipher = Cipher(algorithms.AES(key), modes.GCM(iv, tag))
