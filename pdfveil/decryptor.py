@@ -33,12 +33,15 @@ def decrypt_pdf(input_path: str, password: str, output_path: str = None, force: 
     ciphertext = encrypted_data[28:-16]
 
     # 3. 鍵を導出
-    key = derive_key(password, salt, mode='dec')
+    key = derive_key(password, salt, mode='dec', file=input_path)
 
-    # 4. AES-GCMで復号
-    cipher = Cipher(algorithms.AES(key), modes.GCM(iv, tag))
-    decryptor = cipher.decryptor()
-    decrypted_data = decryptor.update(ciphertext) + decryptor.finalize()
+    try:
+        cipher = Cipher(algorithms.AES(key), modes.GCM(iv, tag))
+        decryptor = cipher.decryptor()
+        decrypted_data = decryptor.update(ciphertext) + decryptor.finalize()
+    except Exception as e:
+        print(f"[!] パスワードが間違っているか、ファイルが破損しています。ファイル '{input_path}' は復号できません。")
+        return  # パスワードが間違っている場合は復号せずスキップ
     
     temp_output_path = "temp_decrypted_output.pdf"
     with open(temp_output_path, "wb") as f:

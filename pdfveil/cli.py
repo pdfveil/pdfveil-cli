@@ -25,13 +25,17 @@ def process_files_one_by_one(files, mode, force, passwords):
             print(f"[!] 指定されたファイル '{file}' が見つかりません。")
             continue
         
-        # 暗号化処理
-        if mode == 'encrypt' or mode == 'enc':
-            encrypt_pdf(matched_files[0], password, force=force)
+        try:
+            # 暗号化処理
+            if mode == 'encrypt' or mode == 'enc':
+                encrypt_pdf(matched_files[0], password, force=force)
         
-        # 復号処理
-        elif mode == 'decrypt' or mode == 'dec':
-            decrypt_pdf(matched_files[0], password, force=force)
+            # 復号処理
+            elif mode == 'decrypt' or mode == 'dec':
+                decrypt_pdf(matched_files[0], password, force=force)
+        except Exception as e:
+            print(f"[!] エラー: {e}")
+            continue
 
 def run_cli():
     # ArgumentParserの設定
