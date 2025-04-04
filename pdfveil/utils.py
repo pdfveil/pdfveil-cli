@@ -10,7 +10,7 @@ from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.primitives.kdf.pbkdf2 import PBKDF2HMAC
 
 def is_strong_password(password: str) -> bool:
-    """強力なパスワードかどうかを検証"""
+    """強力なパスワードかどうかを検証 (12文字以上、大小文字、数字、特殊文字を含む)"""
     return bool(re.match(r'^(?=.*[A-Z])(?=.*[a-z])(?=.*\d)(?=.*[!@#$%^&*])[A-Za-z\d!@#$%^&*]{12,}$', password))
 
 def generate_salt(length: int = 16) -> bytes:
