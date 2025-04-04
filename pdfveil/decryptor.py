@@ -3,6 +3,16 @@
 from .utils import derive_key
 from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
 import sys
+import os
+
+def is_valid_pdf(file_path: str) -> bool:
+    """PDFファイルかどうかを確認する"""
+    try:
+        with open(file_path, "rb") as f:
+            header = f.read(5)
+            return header == b"%PDF-"
+    except Exception:
+        return False
 
 def decrypt_pdf(input_path: str, password: str, output_path: str = None):
     """AES-GCMで暗号化されたPDFを復号して保存"""
@@ -29,6 +39,15 @@ def decrypt_pdf(input_path: str, password: str, output_path: str = None):
     cipher = Cipher(algorithms.AES(key), modes.GCM(iv, tag))
     decryptor = cipher.decryptor()
     decrypted_data = decryptor.update(ciphertext) + decryptor.finalize()
+    
+    temp_output_path = "temp_decrypted_output.pdf"
+    with open(temp_output_path, "wb") as f:
+        f.write(decrypted_data)
+
+    if not is_valid_pdf(temp_output_path):
+        os.remove(temp_output_path)  # 検証用ファイルを削除
+        print("[!] 復号したファイルはPDF形式ではありません。整合性が取れていません。")
+        return
 
     # 5. 出力ファイルに保存
     if not output_path:
@@ -39,5 +58,7 @@ def decrypt_pdf(input_path: str, password: str, output_path: str = None):
 
     with open(output_path, "wb") as f:
         f.write(decrypted_data)
+    
+    os.remove(temp_output_path)  # 一時ファイルを削除
 
     print(f"[+] Decrypted and saved to: {output_path}")
