@@ -1,10 +1,15 @@
 # pdfveil/encryptor.py
 import os
+import sys
 from .utils import generate_salt, derive_key
 from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
 
 def encrypt_pdf(input_path: str, password: str, output_path: str = None):
     """PDFファイルをAES-GCMで暗号化し、.veil.pdfとして保存"""
+    
+    if not input_path.lower().endswith(".pdf"):
+        print(f"[!] 入力ファイルはPDF (.pdf) 形式である必要があります。")
+        sys.exit(1)
     
     # 1. PDFを読み込み
     with open(input_path, "rb") as f:
