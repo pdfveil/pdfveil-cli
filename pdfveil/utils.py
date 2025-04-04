@@ -17,12 +17,12 @@ def generate_salt(length: int = 16) -> bytes:
     """ランダムなソルトを生成"""
     return os.urandom(length)
 
-def derive_key(password: str, salt: bytes, mode: str, iterations: int = 500_000) -> bytes:
+def derive_key(password: str, salt: bytes, mode: str, file: str, iterations: int = 500_000) -> bytes:
     """パスワードとソルトからAES鍵（32バイト）を導出"""
     if mode == 'enc' and not is_strong_password(password):
         # パスワードが強力でない場合にユーザーに確認を取る
         while True:
-            user_response = input("[!] パスワードが強力ではありませんが、このまま暗号化しますか？ (Yes/No): ").strip().lower()
+            user_response = input(f"[!] {file}に設定したパスワードが強力ではありませんが、このまま暗号化しますか？ (Yes/No): ").strip().lower()
             if user_response == 'yes':
                 break  # 暗号化を続行
             elif user_response == 'no':
