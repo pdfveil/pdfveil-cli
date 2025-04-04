@@ -4,23 +4,28 @@ from .encryptor import encrypt_pdf
 from .decryptor import decrypt_pdf
 
 def run_cli():
-    parser = argparse.ArgumentParser(prog="pdfveil", description="Encrypt or decrypt PDF files with strong AES-GCM encryption.")
+    parser = argparse.ArgumentParser(
+        prog="pdfveil",
+        description="🔐 PDFをAES-GCMで安全に暗号化・復号するCLIツール",
+    )
+
     subparsers = parser.add_subparsers(dest="command", required=True)
 
-    # encryptコマンド
-    encrypt_parser = subparsers.add_parser("encrypt", help="Encrypt a PDF file")
-    encrypt_parser.add_argument("input", help="Input PDF file")
-    encrypt_parser.add_argument("--password", "-p", required=True, help="Password for encryption")
-    encrypt_parser.add_argument("--output", "-o", help="Output encrypted file path")
+    # 暗号化コマンド
+    encrypt_parser = subparsers.add_parser("encrypt", help="PDFを暗号化する")
+    encrypt_parser.add_argument("input", help="入力PDFファイルパス")
+    encrypt_parser.add_argument("--password", required=True, help="暗号化に使うパスワード")
+    encrypt_parser.add_argument("--output", help="保存先ファイル名（省略時: .veil.pdf）")
 
-    # decryptコマンド
-    decrypt_parser = subparsers.add_parser("decrypt", help="Decrypt a .veil.pdf file")
-    decrypt_parser.add_argument("input", help="Encrypted .veil.pdf file")
-    decrypt_parser.add_argument("--password", "-p", required=True, help="Password for decryption")
-    decrypt_parser.add_argument("--output", "-o", help="Output decrypted PDF path")
+    # 復号コマンド
+    decrypt_parser = subparsers.add_parser("decrypt", help="PDFを復号する")
+    decrypt_parser.add_argument("input", help="暗号化されたファイル（.veil.pdf）")
+    decrypt_parser.add_argument("--password", required=True, help="復号に使うパスワード")
+    decrypt_parser.add_argument("--output", help="保存先ファイル名（省略時: .decrypted.pdf）")
 
     args = parser.parse_args()
 
+    # サブコマンド実行
     if args.command == "encrypt":
         encrypt_pdf(args.input, args.password, args.output)
     elif args.command == "decrypt":
