@@ -1,3 +1,4 @@
+# pdfveil/cli.py
 import argparse
 from .encryptor import encrypt_pdf
 from .decryptor import decrypt_pdf

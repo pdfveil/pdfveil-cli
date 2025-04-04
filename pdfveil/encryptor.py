@@ -1,3 +1,4 @@
+# pdfveil/encryptor.py
 import os
 from .utils import generate_salt, derive_key
 from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes

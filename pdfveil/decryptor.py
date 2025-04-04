@@ -1,5 +1,5 @@
 # [salt(16)][iv(12)][ciphertext(?)][tag(16)]
-
+# pdfveil/decryptor.py
 from .utils import derive_key
 from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
 
