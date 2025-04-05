@@ -54,14 +54,14 @@ def run_cli():
     # 暗号化コマンド
     encrypt_parser = subparsers.add_parser("encrypt", aliases=["enc"], help=Fore.YELLOW + "PDFを暗号化する" + Fore.RESET)
     encrypt_parser.add_argument("inputpdf", help=Fore.YELLOW + "入力PDFファイルパス (複数指定可能、ワイルドカードも対応)" + Fore.RESET, nargs='+')
-    encrypt_parser.add_argument("-p" ,"--password", help=Fore.YELLOW + "暗号化に使うパスワード（複数指定可能）" + Fore.RESET, nargs='+')
+    encrypt_parser.add_argument("-p" ,"--password", help=Fore.YELLOW + "暗号化に使うパスワード（1つ指定で共通、複数指定で個別対応）" + Fore.RESET, nargs='+')
     encrypt_parser.add_argument("-o" ,"--output", help=Fore.YELLOW + "保存先ファイル名（省略時: .veil.pdf）" + Fore.RESET)
     encrypt_parser.add_argument("-f", "--force", action="store_true", help=Fore.YELLOW + "既存ファイルを強制上書きする" + Fore.RESET)
 
     # 復号コマンド
     decrypt_parser = subparsers.add_parser("decrypt", aliases=["dec"], help=Fore.YELLOW + "PDFを復号する" + Fore.RESET)
     decrypt_parser.add_argument("veilpdf", help=Fore.YELLOW + "暗号化されたファイル（.veil.pdf）" + Fore.RESET, nargs='+')
-    decrypt_parser.add_argument("-p", "--password", help=Fore.YELLOW + "復号に使うパスワード（複数指定可能）" + Fore.RESET, nargs='+')
+    decrypt_parser.add_argument("-p", "--password", help=Fore.YELLOW + "復号に使うパスワード（1つ指定で共通、複数指定で個別対応）" + Fore.RESET, nargs='+')
     decrypt_parser.add_argument("-o" ,"--output", help=Fore.YELLOW + "保存先ファイル名（省略時: .decrypted.pdf）" + Fore.RESET)
     decrypt_parser.add_argument("-f", "--force", action="store_true", help=Fore.YELLOW + "既存ファイルを強制上書きする" + Fore.RESET)
 
@@ -83,27 +83,36 @@ def run_cli():
         print("  python main.py decrypt <暗号化されたファイル> --password <パスワード>")
         exit(1)
 
-    # 対話式パスワード入力（--passwordが省略されたら）
-    if args.password:
-        passwords = args.password
-    else:
-        passwords = []
-        # パスワードをファイル数分だけ要求
-        for idx, file in enumerate(args.inputpdf if args.command in ["encrypt", "enc"] else args.veilpdf):
-            password = getpass.getpass(f"🔑 Enter password for {file}: ")
-            if not password:
-                print("[!] 暗号化にはパスワードが必要です。")
-                exit(1)
-            passwords.append(password)
-
     # ワイルドカードによる複数ファイルを処理
     all_files = []
     for file in args.inputpdf if args.command in ["encrypt", "enc"] else args.veilpdf:
         all_files.extend(glob.glob(file))
-
+    
     if not all_files:
         print(f"[!] 指定されたファイルが見つかりません。")
         exit(1)
+    
+    # パスワード処理
+    passwords = []
+    if args.password:
+        if len(args.password) == 1:
+            # 一つさけ指定 -> 全ファイルに共有パスワード
+            passwords = args.password * len(all_files)
+        elif len(args.password) == len(all_files):
+            # ファイル数と一致 -> 個別パスワード
+            passwords = args.password
+        else:
+            print(f"[!] エラー: パスワードの数 ({len(args.password)}) がファイル数 ({len(all_files)}) と一致しません。")
+            exit(1)
+    else:
+        # パスワード未指定 -> ユーザーから入力
+        for file in all_files:
+            password = getpass.getpass(f"🔑 Enter password for {file}: ")
+            if not password:
+                print("[!] パスワードが必要です。")
+                exit(1)
+            passwords.append(password)
+   
     
     # サブコマンド実行
     if args.command in ["encrypt", "enc"]:
