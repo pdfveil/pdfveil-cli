@@ -54,10 +54,13 @@ def decrypt_pdf(input_path: str, password: str, output_path: str = None, force: 
 
     # 5. 出力ファイルに保存
     if not output_path:
-        if input_path.endswith(".veil"):
-            output_path = input_path.replace(".veil", ".decrypted.pdf")
-        else:
-            output_path = input_path + ".decrypted.pdf"
+        base = os.path.splitext(input_path)[0]
+        output_path = base + ".pdf"
+    else:
+        base = os.path.splitext(output_path)[0]
+        output_path = base + ".pdf"
+    
+    os.remove(temp_output_path)  # 一時ファイルを削除
     
     if os.path.exists(output_path) and not force:
         print(f"[!] 出力先ファイル '{output_path}' は既に存在します。--force を指定して上書きできます。")
@@ -65,7 +68,5 @@ def decrypt_pdf(input_path: str, password: str, output_path: str = None, force: 
 
     with open(output_path, "wb") as f:
         f.write(decrypted_data)
-    
-    os.remove(temp_output_path)  # 一時ファイルを削除
 
     print(f"[+] Decrypted and saved to: {output_path}")
