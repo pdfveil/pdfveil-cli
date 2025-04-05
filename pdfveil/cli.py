@@ -55,6 +55,14 @@ def run_cli():
     # --version フラグ
     parser.add_argument("--version", action="store_true", help=Fore.GREEN + "バージョン情報を表示" + Fore.RESET)
     
+    # 一旦 version フラグのみチェック（この時点ではサブコマンドは無視）
+    args, remaining_args = parser.parse_known_args()
+    if args.version:
+        print(ASCII_LOGO)
+        print(f"📦 Version: {__version__}")
+        return
+
+    
     # サブコマンドの設定
     subparsers = parser.add_subparsers(dest="command", required=True)
 
@@ -75,14 +83,8 @@ def run_cli():
     decrypt_parser.add_argument("--remove", action="store_true", help=Fore.YELLOW + "復号後に .veil ファイルを削除する" + Fore.RESET)
 
     
-    # 最初に引数を解析
+    # 最終的に引数をすべて再解析
     args = parser.parse_args()
-
-    # --version フラグがあれば表示して終了
-    if args.version:
-        print(ASCII_LOGO)
-        print(f"📦 Version: {__version__}")
-        return
         
     # コマンドが指定されていない場合はエラーメッセージを表示
     if not args.command:
