@@ -18,8 +18,8 @@ def decrypt_pdf(input_path: str, password: str, output_path: str = None, force: 
     """AES-GCMで暗号化されたPDFを復号して保存"""
     
     # 0. 入力ファイルの拡張子チェック
-    if not input_path.lower().endswith(".pdf"):
-        print(f"[!] 入力ファイルはPDF (.pdf) 形式である必要があります。")
+    if not input_path.lower().endswith(".veil"):
+        print(f"[!] 入力ファイルはVEIL (.veil) 形式である必要があります。")
         sys.exit(1)
 
     # 1. 暗号化されたファイルを読み込み
@@ -54,8 +54,8 @@ def decrypt_pdf(input_path: str, password: str, output_path: str = None, force: 
 
     # 5. 出力ファイルに保存
     if not output_path:
-        if input_path.endswith(".veil.pdf"):
-            output_path = input_path.replace(".veil.pdf", ".decrypted.pdf")
+        if input_path.endswith(".veil"):
+            output_path = input_path.replace(".veil", ".decrypted.pdf")
         else:
             output_path = input_path + ".decrypted.pdf"
     
