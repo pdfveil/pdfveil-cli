@@ -13,20 +13,19 @@ def teardown_module(module):
     if os.path.exists(OUT_FILE):
         os.remove(OUT_FILE)
 
-@patch("builtins.input", return_value="yes")
-def test_encrypt_pdf_success(mock_input):
-    encrypt_pdf(TEST_PDF, "testpassword", output_path=OUT_FILE, force=True)
+
+def test_encrypt_pdf_success():
+    encrypt_pdf(TEST_PDF, "testpassword", output_path=OUT_FILE, force=True, skip_strength_check=True)
     assert os.path.exists(OUT_FILE)
     assert os.path.getsize(OUT_FILE) > 0
 
-@patch("builtins.input", return_value="yes")
-def test_encrypt_pdf_existing_file_no_force(mock_input):
+def test_encrypt_pdf_existing_file_no_force():
     # 先にファイル作っておく
     with open(OUT_FILE, "wb") as f:
         f.write(b"dummy")
 
     # force=False のときに上書きされないことを確認
-    encrypt_pdf(TEST_PDF, "testpassword", output_path=OUT_FILE, force=False)
+    encrypt_pdf(TEST_PDF, "testpassword", output_path=OUT_FILE, force=False, skip_strength_check=True)
     with open(OUT_FILE, "rb") as f:
         content = f.read()
     assert content == b"dummy"  # 中身が変わっていない

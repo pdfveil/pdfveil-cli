@@ -1,7 +1,5 @@
 # tests/test_decryptor.py
 import os
-import builtins
-from unittest.mock import patch
 from pdfveil.encryptor import encrypt_pdf
 from pdfveil.decryptor import decrypt_pdf
 
@@ -12,8 +10,7 @@ PASSWORD = "testpassword"
 
 def setup_module(module):
     # 暗号化して .veil を用意
-    with patch.object(builtins, 'input', return_value='yes'):
-        encrypt_pdf(TEST_PDF, PASSWORD, output_path=ENCRYPTED_FILE, force=True)
+    encrypt_pdf(TEST_PDF, PASSWORD, output_path=ENCRYPTED_FILE, force=True, skip_strength_check=True)
 
 def teardown_module(module):
     # テスト後のクリーンアップ

@@ -6,6 +6,7 @@
 import os
 import re
 import getpass
+import sys
 from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.primitives.kdf.pbkdf2 import PBKDF2HMAC
 
@@ -17,9 +18,12 @@ def generate_salt(length: int = 16) -> bytes:
     """ランダムなソルトを生成"""
     return os.urandom(length)
 
-def derive_key(password: str, salt: bytes, mode: str, file: str, iterations: int = 500_000) -> bytes:
+def derive_key(password: str, salt: bytes, mode: str, file: str, skip_strength_check=False, iterations: int = 500_000) -> bytes:
     """パスワードとソルトからAES鍵（32バイト）を導出"""
-    if mode == 'enc' and not is_strong_password(password):
+    user_response = ""
+    if skip_strength_check:
+        user_response = "yes"  # 標準入力をシミュレート
+    elif mode == 'enc' and not is_strong_password(password):
         # パスワードが強力でない場合にユーザーに確認を取る
         while True:
             user_response = input(f"[!] {file}に設定したパスワードが強力ではありませんが、このまま暗号化しますか？ (Yes/No): ").strip().lower()
