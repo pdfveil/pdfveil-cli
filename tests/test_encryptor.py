@@ -1,5 +1,6 @@
 import os
 import pytest
+from unittest.mock import patch
 from pdfveil.encryptor import encrypt_pdf
 
 TEST_DIR = os.path.dirname(__file__)
@@ -12,12 +13,14 @@ def teardown_module(module):
     if os.path.exists(OUT_FILE):
         os.remove(OUT_FILE)
 
-def test_encrypt_pdf_success():
+@patch("builtins.input", return_value="yes")
+def test_encrypt_pdf_success(mock_input):
     encrypt_pdf(TEST_PDF, "testpassword", output_path=OUT_FILE, force=True)
     assert os.path.exists(OUT_FILE)
     assert os.path.getsize(OUT_FILE) > 0
 
-def test_encrypt_pdf_existing_file_no_force():
+@patch("builtins.input", return_value="yes")
+def test_encrypt_pdf_existing_file_no_force(mock_input):
     # 先にファイル作っておく
     with open(OUT_FILE, "wb") as f:
         f.write(b"dummy")
@@ -32,7 +35,8 @@ def test_encrypt_pdf_wrong_input_type():
     with pytest.raises(SystemExit):
         encrypt_pdf(TEST_TXT, "testpassword", output_path=OUT_FILE)
 
-def test_encrypt_pdf_default_output_path(tmp_path):
+@patch("builtins.input", return_value="yes")
+def test_encrypt_pdf_default_output_path(mock_input,tmp_path):
     # .veilが自動でつくか
     test_pdf = tmp_path / "test.pdf"
     test_pdf.write_bytes(b"%PDF-1.4 sample data")
