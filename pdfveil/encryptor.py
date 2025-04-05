@@ -31,6 +31,11 @@ def encrypt_pdf(input_path: str, password: str, output_path: str = None, force: 
     # 5. 暗号化ファイルに [salt][iv][ciphertext][tag] を保存
     if not output_path:
         output_path = input_path.replace(".pdf", ".veil")
+    else:
+        # 強制的に .veil 拡張子にする
+        base = os.path.splitext(output_path)[0]
+        output_path = base + ".veil"
+
     
     if os.path.exists(output_path) and not force:
         print(f"[!] 出力先ファイル '{output_path}' は既に存在します。--force を指定して上書きできます。")
