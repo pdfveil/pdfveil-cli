@@ -1,5 +1,6 @@
 # tests/test_decryptor.py
 import os
+import hashlib
 from pdfveil.encryptor import encrypt_pdf
 from pdfveil.decryptor import decrypt_pdf
 
@@ -17,6 +18,14 @@ def teardown_module(module):
     for f in [ENCRYPTED_FILE, DECRYPTED_FILE]:
         if os.path.exists(f):
             os.remove(f)
+            
+def get_file_hash(file_path: str) -> str:
+    """ファイルのSHA256ハッシュを取得"""
+    sha256_hash = hashlib.sha256()
+    with open(file_path, "rb") as f:
+        for byte_block in iter(lambda: f.read(4096), b""):
+            sha256_hash.update(byte_block)
+    return sha256_hash.hexdigest()
 
 def test_decrypt_pdf_success():
     # 復号
@@ -24,6 +33,7 @@ def test_decrypt_pdf_success():
 
     # 元PDFと一致するか
     with open(TEST_PDF, "rb") as f1, open(DECRYPTED_FILE, "rb") as f2:
-        original = f1.read()
-        decrypted = f2.read()
-        assert original == decrypted
+        # ハッシュ値を比較して検証
+        original_hash = get_file_hash(TEST_PDF)
+        decrypted_hash = get_file_hash(DECRYPTED_FILE)
+        assert original_hash == decrypted_hash, "The decrypted file does not match the original file."
