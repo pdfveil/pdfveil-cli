@@ -5,7 +5,7 @@ from .utils import generate_salt, derive_key
 from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
 
 def encrypt_pdf(input_path: str, password: str, output_path: str = None, force: bool = False):
-    """PDFファイルをAES-GCMで暗号化し、.veil.pdfとして保存"""
+    """PDFファイルをAES-GCMで暗号化し、.veilとして保存"""
     
     if not input_path.lower().endswith(".pdf"):
         print(f"[!] 入力ファイルはPDF (.pdf) 形式である必要があります。")

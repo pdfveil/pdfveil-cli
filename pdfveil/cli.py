@@ -95,7 +95,6 @@ def run_cli():
 
     
     # サブコマンドの設定
-    # subparsers = parser.add_subparsers(dest="command", required=True)
     subparsers = parser.add_subparsers(dest="command", required=False)
 
 
