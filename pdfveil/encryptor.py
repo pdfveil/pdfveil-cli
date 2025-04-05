@@ -29,13 +29,23 @@ def encrypt_pdf(input_path: str, password: str, output_path: str = None, force: 
     key = derive_key(password, salt, mode='enc', file=input_path, skip_strength_check=skip_strength_check)
 
     # 3. IV生成（GCM推奨：12バイト）
-    iv = os.urandom(12)
+    metadata_iv = b""
+    iv = os.urandom(12)  # AES-GCMではIVは12バイトが推奨されている
+    
+    # 1バイトのフラグをセット（0x01: メタデータあり, 0x00: メタデータなし）
+    flag = b'\x01' if encrypt_metadata else b'\x00'
     
     # 4. メタデータの暗号化
-    metadata_encrypted = b""
+    metadata_ciphertext = b""
+    metadata_tag = b""  # 最初に初期化しておく 
     if encrypt_metadata:
-        metadata_encrypted = extract_pdf_metadata(input_path)
-
+        metadata_iv = os.urandom(12)  # メタデータ用のIVも生成
+        metadata = extract_pdf_metadata(input_path)
+        cipher_for_metadata = Cipher(algorithms.AES(key), modes.GCM(metadata_iv))
+        encryptor_meta = cipher_for_metadata.encryptor()
+        metadata_ciphertext = encryptor_meta.update(metadata) + encryptor_meta.finalize()
+        metadata_tag = encryptor_meta.tag
+        
     # 5. AES-GCMで暗号化
     cipher = Cipher(algorithms.AES(key), modes.GCM(iv))
     encryptor = cipher.encryptor()
@@ -56,6 +66,15 @@ def encrypt_pdf(input_path: str, password: str, output_path: str = None, force: 
         return
 
     with open(output_path, "wb") as f:
-        f.write(salt + iv + metadata_encrypted + ciphertext + tag)
+        f.write(flag)
+        f.write(salt)
+        if encrypt_metadata:
+            f.write(metadata_iv)
+            f.write(metadata_ciphertext)
+            f.write(metadata_tag)
+        f.write(iv)
+        f.write(ciphertext)
+        f.write(tag)
+
 
     print(f"[+] Encrypted and saved to: {output_path}")
