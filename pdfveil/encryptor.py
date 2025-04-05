@@ -1,6 +1,7 @@
 # pdfveil/encryptor.py
 import os
 import sys
+import struct
 from pypdf import PdfReader
 from .utils import generate_salt, derive_key
 from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
@@ -45,6 +46,8 @@ def encrypt_pdf(input_path: str, password: str, output_path: str = None, force: 
         encryptor_meta = cipher_for_metadata.encryptor()
         metadata_ciphertext = encryptor_meta.update(metadata) + encryptor_meta.finalize()
         metadata_tag = encryptor_meta.tag
+        metadata_length = len(metadata_ciphertext) # メタデータのバイト長
+        packed_length = struct.pack(">I", metadata_length) # 4バイト符号なし整数(ビッグエンディアン)
         
     # 5. AES-GCMで暗号化
     cipher = Cipher(algorithms.AES(key), modes.GCM(iv))
@@ -69,7 +72,10 @@ def encrypt_pdf(input_path: str, password: str, output_path: str = None, force: 
         f.write(flag)
         f.write(salt)
         if encrypt_metadata:
+            #[flag(1)][salt(16)][metadata_iv(12)][metadata_length(4)][metadata_ciphertext(?)][metadata_tag(16)][iv(12)][ciphertext(?)][tag(16)]
+
             f.write(metadata_iv)
+            f.write(packed_length)
             f.write(metadata_ciphertext)
             f.write(metadata_tag)
         f.write(iv)

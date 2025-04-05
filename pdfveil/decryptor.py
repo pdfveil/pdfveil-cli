@@ -1,9 +1,13 @@
-# [salt(16)][iv(12)][ciphertext(?)][tag(16)]
 # pdfveil/decryptor.py
+# encrypted metadata false
+# [salt(16)][iv(12)][ciphertext(?)][tag(16)]
+# encrypted metadata true
+# [flag(1)][salt(16)][metadata_iv(12)][metadata_ciphertext][metadata_tag(16)][iv(12)][ciphertext][tag(16)]
 from .utils import derive_key
 from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
 import sys
 import os
+import struct
 
 def is_valid_pdf(file_path: str) -> bool:
     """PDFファイルかどうかを確認する"""
@@ -25,20 +29,68 @@ def decrypt_pdf(input_path: str, password: str, output_path: str = None, force: 
     # 1. 暗号化されたファイルを読み込み
     with open(input_path, "rb") as f:
         encrypted_data = f.read()
-
-    # 2. 各データを取り出す
-    salt = encrypted_data[:16]
-    iv = encrypted_data[16:28]
-    tag = encrypted_data[-16:]
-    ciphertext = encrypted_data[28:-16]
+    
+    offset = 0
+    
+    # 2. フラグを読み取り
+    flag = encrypted_data[offset]
+    offset += 1
+    
+    # 3. ソルトを抽出
+    salt = encrypted_data[offset:offset+16]
+    offset += 16
 
     # 3. 鍵を導出
     key = derive_key(password, salt, mode='dec', file=input_path)
 
     try:
-        cipher = Cipher(algorithms.AES(key), modes.GCM(iv, tag))
-        decryptor = cipher.decryptor()
-        decrypted_data = decryptor.update(ciphertext) + decryptor.finalize()
+        if flag == 0x00:
+            # メタデータなし構造: [flag][salt][iv][ciphertext][tag]
+            iv = encrypted_data[offset:offset+12]
+            offset += 12
+            tag = encrypted_data[-16:]
+            ciphertext = encrypted_data[offset:-16]
+        elif flag == 0x01:
+            # メタデータあり構造
+            # [flag][salt][metadata_iv][metadata_length][metadata_ciphertext][metadata_tag][iv][ciphertext][tag]
+            metadata_iv = encrypted_data[offset:offset+12]
+            offset += 12
+            
+            # メタデータの長さが不明なので、末尾の[iv+ciphertext][tag(16)]を逆から読む
+            # -> tag(16) + iv(12)は固定 -> 残りがmetadata_ciphertxt ; metadata_tag
+            metadata_len = struct.unpack(">I", encrypted_data[offset:offset+4])[0]
+            offset += 4
+            
+            metadata_ciphertext = encrypted_data[offset:offset+ metadata_len]
+            offset += metadata_len
+            
+            metadata_tag = encrypted_data[offset:offset+16]
+            offset += 16
+            
+            # メタデータ復号(今は表示だけ。利用しない)
+            cipher_meta = Cipher(algorithms.AES(key), modes.GCM(metadata_iv, metadata_tag))
+            decryptor_meta = cipher_meta.decryptor()
+            try:
+                metadata_plan = decryptor_meta.update(metadata_ciphertext) + decryptor_meta.finalize()
+                print(f"[*] Metadata: {metadata_plan.decode('utf-8')}")
+            except Exception as e:
+                print(f"[!] メタデータの復号に失敗しました: {e}")
+                return
+        else:
+            print("[!] 不明なフラグです。ファイルが破損している可能性があります。")
+            return
+
+        iv = encrypted_data[offset:offset+12]
+        offset += 12
+        tag = encrypted_data[-16:]
+        ciphertext = encrypted_data[offset:-16]
+        try:
+            cipher = Cipher(algorithms.AES(key), modes.GCM(iv, tag))
+            decryptor = cipher.decryptor()
+            decrypted_data = decryptor.update(ciphertext) + decryptor.finalize()
+        except Exception as e:
+            print(f"[!] 復号に失敗しました。パスワードが間違っているか、ファイルが破損している可能性があります。")
+            return
     except Exception as e:
         print(f"[!] パスワードが間違っているか、ファイルが破損しています。ファイル '{input_path}' は復号できません。")
         return  # パスワードが間違っている場合は復号せずスキップ
