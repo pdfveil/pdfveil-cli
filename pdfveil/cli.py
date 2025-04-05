@@ -50,13 +50,44 @@ def run_cli():
         prog="pdfveil",
         description=Fore.CYAN + "🔐 PDFをAES-GCMで安全に暗号化・復号するCLIツール" + Fore.RESET,
         formatter_class=argparse.RawTextHelpFormatter,  # より読みやすいヘルプ表示
+        add_help=False  # デフォルトの --help を無効にする
     )
+    
+    # カスタム --help フラグ
+    parser.add_argument("--help", action="store_true", help=Fore.GREEN + "カスタムヘルプを表示" + Fore.RESET)
     
     # --version フラグ
     parser.add_argument("--version", action="store_true", help=Fore.GREEN + "バージョン情報を表示" + Fore.RESET)
     
     # 一旦 version フラグのみチェック（この時点ではサブコマンドは無視）
     args, remaining_args = parser.parse_known_args()
+    
+    # --help フラグが指定された場合
+    if args.help:
+        # カスタムメッセージ表示
+        print(ASCII_LOGO)
+        print("pdfveil version " + __version__)
+        print(Fore.YELLOW + "\n使用方法:")
+        print(Fore.YELLOW + "  pdfveil encrypt <入力PDFファイル> [--password <パスワード>] [--output <保存先ファイル名>] [--force]")
+        print(Fore.YELLOW + "  pdfveil decrypt <暗号化されたファイル> [--password <パスワード>] [--output <保存先ファイル名>] [--force]")
+        print(Fore.YELLOW + "\nコマンド:")
+        print(Fore.YELLOW + "  encrypt, enc  PDFを暗号化")
+        print(Fore.YELLOW + "  decrypt, dec  PDFを復号")
+        print(Fore.YELLOW + "\n引数:")
+        print(Fore.YELLOW + "  --password <パスワード>      暗号化/復号に使用するパスワード")
+        print(Fore.YELLOW + "  --output <保存先ファイル名>  保存先のファイル名")
+        print(Fore.YELLOW + "  --force                      既存ファイルを強制上書き")
+        print(Fore.YELLOW + "  --remove                     処理後に元のファイルを削除")
+        print(Fore.YELLOW + "\nオプション:")
+        print(Fore.YELLOW + "  --help          このヘルプを表示")
+        print(Fore.YELLOW + "  --version       バージョン情報を表示")
+        print(Fore.CYAN + "\nツール概要:")
+        print(Fore.CYAN + "  このツールは、PDFファイルをAES-GCMアルゴリズムで暗号化および復号化するためのCLIツールです。")
+        print(Fore.CYAN + "  入力されたPDFファイルに対して、安全な暗号化を施し、パスワードを使って復号化します。")
+        print(Fore.CYAN + "  このツールは、あなたのPDFのセキュリティを保護するために設計されています。\n")
+        return
+    
+    # --version フラグが指定された場合
     if args.version:
         print(ASCII_LOGO)
         print(f"📦 Version: {__version__}")
@@ -64,10 +95,18 @@ def run_cli():
 
     
     # サブコマンドの設定
-    subparsers = parser.add_subparsers(dest="command", required=True)
+    # subparsers = parser.add_subparsers(dest="command", required=True)
+    subparsers = parser.add_subparsers(dest="command", required=False)
+
 
     # 暗号化コマンド
-    encrypt_parser = subparsers.add_parser("encrypt", aliases=["enc"], help=Fore.YELLOW + "PDFを暗号化する" + Fore.RESET)
+    encrypt_parser = subparsers.add_parser(
+        "encrypt",
+        aliases=["enc"],
+        help=Fore.YELLOW + "PDFを暗号化する" + Fore.RESET,
+        description="🔐 指定されたPDFファイルをAES-GCMで暗号化します。",
+        formatter_class=argparse.RawTextHelpFormatter
+    )
     encrypt_parser.add_argument("inputpdf", help=Fore.YELLOW + "入力PDFファイルパス (複数指定可能、ワイルドカードも対応)" + Fore.RESET, nargs='+')
     encrypt_parser.add_argument("-p" ,"--password", help=Fore.YELLOW + "暗号化に使うパスワード（1つ指定で共通、複数指定で個別対応）" + Fore.RESET, nargs='+')
     encrypt_parser.add_argument("-o" ,"--output", help=Fore.YELLOW + "保存先ファイル名（省略時: .veil.pdf）" + Fore.RESET)
@@ -75,7 +114,13 @@ def run_cli():
     encrypt_parser.add_argument("--remove", action="store_true", help=Fore.YELLOW + "暗号化後に元のPDFを削除する" + Fore.RESET)
 
     # 復号コマンド
-    decrypt_parser = subparsers.add_parser("decrypt", aliases=["dec"], help=Fore.YELLOW + "PDFを復号する" + Fore.RESET)
+    decrypt_parser = subparsers.add_parser(
+        "decrypt",
+        aliases=["dec"],
+        help=Fore.YELLOW + "PDFを復号する" + Fore.RESET,
+        description="🔓 .veil ファイルを復号して元のPDFに戻します。",
+        formatter_class=argparse.RawTextHelpFormatter
+    )
     decrypt_parser.add_argument("veilpdf", help=Fore.YELLOW + "暗号化されたファイル（.veil.pdf）" + Fore.RESET, nargs='+')
     decrypt_parser.add_argument("-p", "--password", help=Fore.YELLOW + "復号に使うパスワード（1つ指定で共通、複数指定で個別対応）" + Fore.RESET, nargs='+')
     decrypt_parser.add_argument("-o" ,"--output", help=Fore.YELLOW + "保存先ファイル名（省略時: .decrypted.pdf）" + Fore.RESET)
