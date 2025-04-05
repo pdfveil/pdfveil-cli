@@ -4,7 +4,7 @@ import sys
 from .utils import generate_salt, derive_key
 from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
 
-def encrypt_pdf(input_path: str, password: str, output_path: str = None, force: bool = False):
+def encrypt_pdf(input_path: str, password: str, output_path: str = None, force: bool = False, skip_strength_check=False):
     """PDFファイルをAES-GCMで暗号化し、.veilとして保存"""
     
     if not input_path.lower().endswith(".pdf"):
@@ -17,7 +17,7 @@ def encrypt_pdf(input_path: str, password: str, output_path: str = None, force: 
 
     # 2. ソルト & 鍵生成
     salt = generate_salt()
-    key = derive_key(password, salt, mode='enc', file=input_path)
+    key = derive_key(password, salt, mode='enc', file=input_path, skip_strength_check=skip_strength_check)
 
     # 3. IV生成（GCM推奨：12バイト）
     iv = os.urandom(12)
