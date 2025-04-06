@@ -1,8 +1,8 @@
 #!/usr/bin/make -f
 
 %:
-    dh $@ --with python3
+	dh $@ --with python3
 
 override_dh_install:
-    dh_install
-    chmod +x $(DESTDIR)/usr/bin/pdfveil
+	dh_install
+	chmod +x $(DESTDIR)/usr/bin/pdfveil
