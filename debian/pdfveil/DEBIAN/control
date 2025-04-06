@@ -1,0 +1,11 @@
+Package: pdfveil
+Version: 0.1.0-1
+Architecture: all
+Maintainer: Saku0512 <comonraven113@gmail.com>
+Installed-Size: 16
+Depends: python3-pypdf, python3-cryptography
+Section: utils
+Priority: optional
+Description: A PDF encryption and decryption tool with metadata support
+ PDFVeil is a command-line tool to encrypt and decrypt PDF files securely using AES-GCM encryption.
+ It can also store PDF metadata in encrypted or unencrypted format.
