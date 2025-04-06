@@ -1,3 +1,9 @@
 memo.*
 __pycache__/
 *.pyc
+
+*.deb
+*.build
+*.dsc
+*.changes
+*.tar.xz
