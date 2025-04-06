@@ -1,0 +1,9 @@
+pdfveil (0.1.0-1) unstable; urgency=medium
+
+  * Initial release of pdfveil package
+  * Add PDF encryption and decryption functionality
+  * Support for metadata encryption and decryption
+  * Added unit tests for encryption and decryption
+  * Setup packaging for Debian
+
+ -- Saku0512 <comonraven113@gmail.com>  Sat, 06 Apr 2025 00:00:00 +0900
