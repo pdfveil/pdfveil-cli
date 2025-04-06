@@ -1,6 +1,0 @@
-Format: https://www.debian.org/doc/packaging-manuals/copyright-format/1.0/
-Source: https://github.com/Saku0512/pdfveil
-
-Files: *
-Copyright: 2025 Saku0512 <comonraven113@gmail.com>
-License: MIT
