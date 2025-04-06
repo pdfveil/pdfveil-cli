@@ -2,6 +2,7 @@
 import os
 import sys
 import struct
+import json
 from pypdf import PdfReader
 from .utils import generate_salt, derive_key
 from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
@@ -11,8 +12,10 @@ def extract_pdf_metadata(file_path: str) -> bytes:
     with open(file_path, "rb") as f:
         reader = PdfReader(f)
         metadata = reader.metadata  # メタデータを取得
-    metadata_str = str(metadata).encode("utf-8")  # メタデータを文字列としてエンコード
-    return metadata_str
+    # pypdfのmetadataはKeyがPdfNameオブジェクトなので、str化してjsonに変換
+    metadata_dict = {str(k): str(v) for k, v in metadata.items() if v is not None}
+    metadata_json = json.dumps(metadata_dict, ensure_ascii=False).encode("utf-8")
+    return metadata_json
 
 def encrypt_pdf(input_path: str, password: str, output_path: str = None, force: bool = False, skip_strength_check=False, encrypt_metadata=True):
     """PDFファイルをAES-GCMで暗号化し、.veilとして保存"""

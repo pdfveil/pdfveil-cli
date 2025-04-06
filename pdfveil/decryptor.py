@@ -10,6 +10,7 @@ import os
 import struct
 import re
 from datetime import datetime, timedelta
+import json
 
 def parse_pdf_date(pdf_date_str: str) -> str:
     """PDF日付文字列（例: D:20250404160638+00'00'）を整形"""
@@ -35,7 +36,7 @@ def print_formatted_metadata(meta_dict: dict):
             value = parse_pdf_date(value)
 
         print(f"{clean_key+':':<16}{value}")
-    print("\n")
+    print("")
 
 def is_valid_pdf(file_path: str) -> bool:
     """PDFファイルかどうかを確認する"""
@@ -100,11 +101,18 @@ def decrypt_pdf(input_path: str, password: str, output_path: str = None, force: 
             decryptor_meta = cipher_meta.decryptor()
             try:
                 metadata_plan = decryptor_meta.update(metadata_ciphertext) + decryptor_meta.finalize()
-                meta_dict = eval(metadata_plan.decode('utf-8'))  # ※将来的に安全にするならJSONにした方がよい
+    
+                try:
+                    meta_dict = json.loads(metadata_plan.decode("utf-8"))
+                except json.JSONDecodeError as e:
+                    print(f"[!] メタデータの解析に失敗しました（JSON形式が正しくありません）: {e}")
+                    return
+
                 print_formatted_metadata(meta_dict)
             except Exception as e:
                 print(f"[!] メタデータの復号に失敗しました: {e}")
                 return
+
         else:
             print("[!] 不明なフラグです。ファイルが破損している可能性があります。")
             return
