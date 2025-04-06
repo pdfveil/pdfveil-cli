@@ -8,6 +8,34 @@ from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
 import sys
 import os
 import struct
+import re
+from datetime import datetime, timedelta
+
+def parse_pdf_date(pdf_date_str: str) -> str:
+    """PDF日付文字列（例: D:20250404160638+00'00'）を整形"""
+    match = re.match(r"D:(\d{4})(\d{2})(\d{2})(\d{2})(\d{2})(\d{2})([+-Z])?(\d{2})?'?(\d{2})?'?", pdf_date_str)
+    if not match:
+        return pdf_date_str  # フォーマット不明ならそのまま
+
+    year, month, day, hour, minute, second, tz_sign, tz_hour, tz_minute = match.groups()
+    dt = datetime(int(year), int(month), int(day), int(hour), int(minute), int(second))
+
+    # タイムゾーンの調整（現状は JST 固定にする）
+    jst = dt + timedelta(hours=9)
+    return jst.strftime("%a %b %d %H:%M:%S %Y JST")
+
+def print_formatted_metadata(meta_dict: dict):
+    """整形してメタデータを出力"""
+    print("[*] Metadata")
+    for key in sorted(meta_dict.keys()):
+        clean_key = key.strip("/")
+
+        value = meta_dict[key]
+        if "Date" in clean_key and isinstance(value, str):
+            value = parse_pdf_date(value)
+
+        print(f"{clean_key+':':<16}{value}")
+    print("\n")
 
 def is_valid_pdf(file_path: str) -> bool:
     """PDFファイルかどうかを確認する"""
@@ -72,7 +100,8 @@ def decrypt_pdf(input_path: str, password: str, output_path: str = None, force: 
             decryptor_meta = cipher_meta.decryptor()
             try:
                 metadata_plan = decryptor_meta.update(metadata_ciphertext) + decryptor_meta.finalize()
-                print(f"[*] Metadata: {metadata_plan.decode('utf-8')}")
+                meta_dict = eval(metadata_plan.decode('utf-8'))  # ※将来的に安全にするならJSONにした方がよい
+                print_formatted_metadata(meta_dict)
             except Exception as e:
                 print(f"[!] メタデータの復号に失敗しました: {e}")
                 return
