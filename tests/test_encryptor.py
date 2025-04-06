@@ -1,6 +1,6 @@
 import os
 import pytest
-from unittest.mock import patch
+from pypdf import PdfWriter
 from pdfveil.encryptor import encrypt_pdf
 
 TEST_DIR = os.path.dirname(__file__)
@@ -34,11 +34,16 @@ def test_encrypt_pdf_wrong_input_type():
     with pytest.raises(SystemExit):
         encrypt_pdf(TEST_TXT, "testpassword", output_path=OUT_FILE)
 
-@patch("builtins.input", return_value="yes")
-def test_encrypt_pdf_default_output_path(mock_input,tmp_path):
+def test_encrypt_pdf_default_output_path(tmp_path):
     # .veilが自動でつくか
     test_pdf = tmp_path / "test.pdf"
-    test_pdf.write_bytes(b"%PDF-1.4 sample data")
-    encrypt_pdf(str(test_pdf), "pass123")
+    writer = PdfWriter()
+    writer.add_blank_page(width=72, height=72)
+    with open(test_pdf, "wb") as f:
+        writer.write(f)
+
+    # テスト対象呼び出し
+    encrypt_pdf(str(test_pdf), "pass123", skip_strength_check=True)
+
     output_path = str(test_pdf).replace(".pdf", ".veil")
     assert os.path.exists(output_path)
