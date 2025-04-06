@@ -1,0 +1,6 @@
+version: 2
+updates:
+  - package-ecosystem: "pip"  # Pythonの依存関係を管理
+    directory: "/"  # 依存関係が記載されているディレクトリ
+    schedule:
+      interval: "weekly"  # 更新の頻度（例：毎週）
