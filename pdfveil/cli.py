@@ -12,7 +12,7 @@ from .logo import ASCII_LOGO
 # 初期化
 init(autoreset=True)
 
-def process_files_one_by_one(files, mode, force, passwords, remove=False, output=None):
+def process_files_one_by_one(files, mode, force, passwords, remove=False, output=None, encrypt_metadata=True):
     # パスワードリストをファイル数分用意し、1つずつ処理する
     for idx, file in enumerate(files):
         password = passwords[idx]  # 既にリストでパスワードを取得しているため、ここではリストから取得
@@ -29,7 +29,7 @@ def process_files_one_by_one(files, mode, force, passwords, remove=False, output
         try:
             # 暗号化処理
             if mode == 'encrypt' or mode == 'enc':
-                encrypt_pdf(matched_files[0], password, output_path=output, force=force)
+                encrypt_pdf(matched_files[0], password, output_path=output, force=force, encrypt_metadata=encrypt_metadata)
                 if remove:
                     os.remove(matched_files[0])
                     print(f"[i] 元のPDF '{matched_files[0]}' を削除しました。")
@@ -111,6 +111,7 @@ def run_cli():
     encrypt_parser.add_argument("-o" ,"--output", help=Fore.YELLOW + "保存先ファイル名（省略時: .veil.pdf）" + Fore.RESET)
     encrypt_parser.add_argument("-f", "--force", action="store_true", help=Fore.YELLOW + "既存ファイルを強制上書きする" + Fore.RESET)
     encrypt_parser.add_argument("--remove", action="store_true", help=Fore.YELLOW + "暗号化後に元のPDFを削除する" + Fore.RESET)
+    encrypt_parser.add_argument("--no-encrypt-metadata", action="store_true", help=Fore.YELLOW + "メタデータを暗号化しない" + Fore.RESET)
 
     # 復号コマンド
     decrypt_parser = subparsers.add_parser(
@@ -171,6 +172,7 @@ def run_cli():
     
     # サブコマンド実行
     if args.command in ["encrypt", "enc"]:
-        process_files_one_by_one(all_files, "encrypt", args.force, passwords, remove=args.remove, output=args.output)
+        encrypt_metadata = not args.no_encrypt_metadata  # no-encrypt-metadata が指定された場合は False
+        process_files_one_by_one(all_files, "encrypt", args.force, passwords, remove=args.remove, output=args.output, encrypt_metadata=encrypt_metadata)
     elif args.command in ["decrypt", "dec"]:
         process_files_one_by_one(all_files, "decrypt", args.force, passwords, remove=args.remove, output=args.output)

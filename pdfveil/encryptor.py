@@ -1,10 +1,23 @@
 # pdfveil/encryptor.py
 import os
 import sys
+import struct
+import json
+from pypdf import PdfReader
 from .utils import generate_salt, derive_key
 from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
 
-def encrypt_pdf(input_path: str, password: str, output_path: str = None, force: bool = False, skip_strength_check=False):
+def extract_pdf_metadata(file_path: str) -> bytes:
+    """pypdfを使用してPDFのメタデータを抽出してバイト列に変換"""
+    with open(file_path, "rb") as f:
+        reader = PdfReader(f)
+        metadata = reader.metadata  # メタデータを取得
+    # pypdfのmetadataはKeyがPdfNameオブジェクトなので、str化してjsonに変換
+    metadata_dict = {str(k): str(v) for k, v in metadata.items() if v is not None}
+    metadata_json = json.dumps(metadata_dict, ensure_ascii=False).encode("utf-8")
+    return metadata_json
+
+def encrypt_pdf(input_path: str, password: str, output_path: str = None, force: bool = False, skip_strength_check=False, encrypt_metadata=True):
     """PDFファイルをAES-GCMで暗号化し、.veilとして保存"""
     
     if not input_path.lower().endswith(".pdf"):
@@ -20,15 +33,32 @@ def encrypt_pdf(input_path: str, password: str, output_path: str = None, force: 
     key = derive_key(password, salt, mode='enc', file=input_path, skip_strength_check=skip_strength_check)
 
     # 3. IV生成（GCM推奨：12バイト）
-    iv = os.urandom(12)
-
-    # 4. AES-GCMで暗号化
+    metadata_iv = b""
+    iv = os.urandom(12)  # AES-GCMではIVは12バイトが推奨されている
+    
+    # 1バイトのフラグをセット（0x01: メタデータあり, 0x00: メタデータなし）
+    flag = b'\x01' if encrypt_metadata else b'\x00'
+    
+    # 4. メタデータの暗号化
+    metadata_ciphertext = b""
+    metadata_tag = b""  # 最初に初期化しておく 
+    if encrypt_metadata:
+        metadata_iv = os.urandom(12)  # メタデータ用のIVも生成
+        metadata = extract_pdf_metadata(input_path)
+        cipher_for_metadata = Cipher(algorithms.AES(key), modes.GCM(metadata_iv))
+        encryptor_meta = cipher_for_metadata.encryptor()
+        metadata_ciphertext = encryptor_meta.update(metadata) + encryptor_meta.finalize()
+        metadata_tag = encryptor_meta.tag
+        metadata_length = len(metadata_ciphertext) # メタデータのバイト長
+        packed_length = struct.pack(">I", metadata_length) # 4バイト符号なし整数(ビッグエンディアン)
+        
+    # 5. AES-GCMで暗号化
     cipher = Cipher(algorithms.AES(key), modes.GCM(iv))
     encryptor = cipher.encryptor()
     ciphertext = encryptor.update(data) + encryptor.finalize()
     tag = encryptor.tag  # 認証タグ（16バイト）
 
-    # 5. 暗号化ファイルに [salt][iv][ciphertext][tag] を保存
+    # 6. 暗号化ファイルに [salt][iv][metadata][ciphertext][tag] を保存
     if not output_path:
         output_path = input_path.replace(".pdf", ".veil")
     else:
@@ -42,6 +72,18 @@ def encrypt_pdf(input_path: str, password: str, output_path: str = None, force: 
         return
 
     with open(output_path, "wb") as f:
-        f.write(salt + iv + ciphertext + tag)
+        f.write(flag)
+        f.write(salt)
+        if encrypt_metadata:
+            #[flag(1)][salt(16)][metadata_iv(12)][metadata_length(4)][metadata_ciphertext(?)][metadata_tag(16)][iv(12)][ciphertext(?)][tag(16)]
+
+            f.write(metadata_iv)
+            f.write(packed_length)
+            f.write(metadata_ciphertext)
+            f.write(metadata_tag)
+        f.write(iv)
+        f.write(ciphertext)
+        f.write(tag)
+
 
     print(f"[+] Encrypted and saved to: {output_path}")
