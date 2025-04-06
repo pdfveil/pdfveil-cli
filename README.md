@@ -1,3 +1,11 @@
+![Build](https://img.shields.io/badge/build-passing-gren)
+![LICENSE](https://img.shields.io/badge/LICENSE-MIT-green)
+![Python](https://img.shields.io/badge/Python-3.11-blue)
+![cryptography](https://img.shields.io/badge/cryptography-43.0.0-blue)
+![pypdf](https://img.shields.io/badge/pypdf-5.4.0-blue)
+![colorama](https://img.shields.io/badge/colorama-0.4.6-blue)
+![pytest](https://img.shields.io/badge/pytest-8.3.5-blue)
+
 # `pdfveil` - PDF暗号化CLIツール
 
 PDFVeilは、AES-GCM暗号化を使用してPDFファイルを安全に暗号化および復号化するために設計されたコマンドラインツールです。 また、PDFメタデータを暗号化または非暗号化形式で保存するオプションも提供します。 このツールは、PDF文書を保護するためのシンプルで効率的な方法を提供することを目指しています。
