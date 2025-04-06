@@ -1,0 +1,13 @@
+../scripts/pdfveil,sha256=ddqUyzf3VTozmJXY2uLBHBEqeM20f7l0k2_0KdX8nTA,216
+pdfveil/__init__.py,sha256=J-j-u0itpEFT6irdmWmixQqYMadNl1X91TxUmoiLHMI,22
+pdfveil/cli.py,sha256=9jT0pSm4oHAkWwmuNVgCh1_lNVe3aJt_nUJRcpa0ufM,9522
+pdfveil/decryptor.py,sha256=9sUl314b0unf5uw7sIi-wO_nyKvg07ebSj_e3xDMXw0,6483
+pdfveil/encryptor.py,sha256=jPjdSFaZHLKNOl7xYJsKxIpjA2pkjEAOSfVWgeG_Uek,3778
+pdfveil/logo.py,sha256=-pop5qbHpI5AtcCDjLIcfsdTDZrVLhH-avvPolZTzSQ,341
+pdfveil/utils.py,sha256=7IiyCeAnrITjqwAos5dcsj7-K-TfgaSEZZFGw53ZuIg,2139
+pdfveil-0.1.0.dist-info/LICENSE,sha256=WZyhJnezCsjmB5AFkaRfDPbYKxF-sP-KnWsACBo35Pk,1065
+pdfveil-0.1.0.dist-info/METADATA,sha256=Cl5zYNTsDLJ8T4rcfRfr74WZxmyUu5MoTtR-mJowbwc,1165
+pdfveil-0.1.0.dist-info/WHEEL,sha256=PZUExdf71Ui_so67QXpySuHtCi3-J3wvF4ORK6k_S8U,91
+pdfveil-0.1.0.dist-info/entry_points.txt,sha256=NUzyhKHETPblMRsLqEbmtu_X38mwDGKBICszowxMS7c,48
+pdfveil-0.1.0.dist-info/top_level.txt,sha256=rcbFFZkZ6HJlFDQiq_jjASZ6wgeAPh_RD-d4_MO0ytg,8
+pdfveil-0.1.0.dist-info/RECORD,,

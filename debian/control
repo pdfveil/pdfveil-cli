@@ -1,0 +1,23 @@
+Source: pdfveil
+Section: utils
+Priority: optional
+Maintainer: Saku0512 <comonraven113@gmail.com>
+Build-Depends: debhelper-compat (= 13),
+               dh-python,
+               python3-all,
+               python3-setuptools,
+               python3-wheel,
+               python3-pypdf,
+               python3-cryptography (= 43.0.0-1),
+               pybuild-plugin-pyproject,
+               python3-colorama
+Standards-Version: 4.5.0
+Homepage: https://github.com/Saku0512/pdfveil
+
+Package: pdfveil
+Architecture: all
+Depends: python3-pypdf,
+         python3-cryptography (= 43.0.0-1),
+         python3-colorama
+Description: A CLI tool for encrypting and decrypting PDF files
+ This tool allows you to encrypt and decrypt PDF files from the command line.
