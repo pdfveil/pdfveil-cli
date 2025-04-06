@@ -1,0 +1,2 @@
+[console_scripts]
+pdfveil = pdfveil.cli:run_cli

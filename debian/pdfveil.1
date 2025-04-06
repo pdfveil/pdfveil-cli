@@ -1,0 +1,68 @@
+.TH PDFVEIL 1 "April 2025" "pdfveil 1.0.0" "PDF Encryption Tool"
+.SH NAME
+pdfveil \- AES-GCMを使ってPDFを安全に暗号化・復号するCLIツール
+.SH SYNOPSIS
+.B pdfveil
+[\-\-help] [\-\-version]
+.br
+.B pdfveil encrypt|enc
+<INPUT_PDF>... [\-p|--password <PASSWORD>...] [\-o|--output <FILE>] [\-f|--force] [\-\-remove] [\-\-no-encrypt-metadata]
+.br
+.B pdfveil decrypt|dec
+<VEIL_PDF>... [\-p|--password <PASSWORD>...] [\-o|--output <FILE>] [\-f|--force] [\-\-remove]
+.SH DESCRIPTION
+.B pdfveil
+は、PDFファイルをAES-GCMで暗号化・復号するためのコマンドラインツールです。
+.br
+暗号化されたファイルは .veil.pdf の形式で出力されます。
+.PP
+複数ファイルの処理に対応しており、ワイルドカードでの指定やファイル毎に異なるパスワードの設定が可能です。
+.SH COMMANDS
+.TP
+.B encrypt, enc
+指定したPDFファイルを暗号化します。
+.TP
+.B decrypt, dec
+暗号化された.veil.pdfファイルを復号し、元のPDFファイルに戻します。
+.SH OPTIONS
+.TP
+.B \-p, \-\-password <PASSWORD>...
+暗号化/復号に使用するパスワード。複数指定でファイルごとに異なるパスワードを設定可能。
+.br
+省略時はプロンプトでパスワードが要求されます。
+.TP
+.B \-o, \-\-output <FILE>
+出力ファイルの名前を指定します（省略時は自動命名）。
+.TP
+.B \-f, \-\-force
+既存のファイルを上書きします。
+.TP
+.B \-\-remove
+処理完了後に元のファイルを削除します。
+.TP
+.B \-\-no-encrypt-metadata
+PDFのメタデータを暗号化しません（デフォルトでは暗号化されます）。
+.TP
+.B \-\-help
+このヘルプを表示します。
+.TP
+.B \-\-version
+バージョン情報を表示します。
+.SH USAGE EXAMPLES
+.TP
+PDFを暗号化：
+.B pdfveil encrypt report.pdf \-\-password mypass123
+.TP
+復号して元のPDFに戻す：
+.B pdfveil decrypt report.veil.pdf \-\-password mypass123
+.TP
+複数ファイルを個別パスワードで暗号化：
+.B pdfveil encrypt file1.pdf file2.pdf \-\-password pass1 pass2
+.TP
+ワイルドカードを使って暗号化：
+.B pdfveil encrypt *.pdf \-\-password sharedpass
+.SH AUTHOR
+Developed by Saku0512.
+.SH VERSION
+1.0.0
+

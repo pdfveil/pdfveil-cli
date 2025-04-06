@@ -1,3 +1,23 @@
-memo.*
+# ビルド系
+build/
+.pybuild/
+pdfveil.egg-info/
+.pc/
+
+# Pythonキャッシュ系
 __pycache__/
-*.pyc
+*.py[cod]
+
+# OS/IDE系（必要に応じて）
+.DS_Store
+.idea/
+.vscode/
+
+# pytest
+.pytest_cache/
+
+# debファイル（ビルド後に生成する場合）
+*.deb
+
+# 個人用開発用メモ
+memo*

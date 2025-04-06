@@ -1,0 +1,26 @@
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "pdfveil"
+version = "0.1.0"
+description = "CLI tool for encrypting and decrypting PDF files"
+authors = [
+    {name = "Saku0512", email = "comonraven113@gmail.com"},
+]
+dependencies = [
+    "cryptography>=44.0.2",
+]
+requires-python = ">=3.7"
+readme = "README.md"
+license = {text = "MIT"}
+keywords = ["pdf", "encryption", "cli"]
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+]
+
+[project.scripts]
+pdfveil = "pdfveil.cli:run_cli"
