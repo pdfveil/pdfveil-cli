@@ -1,4 +1,4 @@
-![Build](https://img.shields.io/badge/build-passing-gren)
+![Build](https://img.shields.io/badge/build-passing-green)
 ![LICENSE](https://img.shields.io/badge/LICENSE-MIT-green)
 ![Python](https://img.shields.io/badge/Python-3.11-blue)
 ![cryptography](https://img.shields.io/badge/cryptography-43.0.0-blue)
@@ -9,97 +9,119 @@
 # `pdfveil` - PDF暗号化CLIツール
 
 <p align="center">
-  <img src="https://github.com/user-attachments/assets/9c094071-57b5-4224-ac0c-2ff4b7d9d219" alt="ロゴ" width="400px" height="auto">
+  <img src="https://github.com/user-attachments/assets/9c094071-57b5-4224-ac0c-2ff4b7d9d219" alt="ロゴ" width="400px">
 </p>
 
+**pdfveil** は、PDFファイルを強力なAES-GCM方式で暗号化・復号するためのシンプルかつ安全なCLIツールです。  
+メタデータの暗号化有無を選べる柔軟性と、扱いやすいコマンドライン操作を特徴としています。
 
-PDFVeilは、AES-GCM暗号化を使用してPDFファイルを安全に暗号化および復号化するために設計されたコマンドラインツールです。 また、PDFメタデータを暗号化または非暗号化形式で保存するオプションも提供します。 このツールは、PDF文書を保護するためのシンプルで効率的な方法を提供することを目指しています。
+---
 
-## 特徴
+## 🔒 主な機能
 
-- **PDF暗号化**: AES-GCMでPDFファイルを暗号化し、強力なセキュリティを確保します。
-- **メタデータの暗号化**: デフォルトでPDFメタデータも暗号化する。
-- **復号**: 正しいパスワードで暗号化されたPDFファイルを復号化します。
-- **CLI操作**: コマンドラインから簡単に操作することができます。
-- **強力な暗号化**: AES-256を用いてPDFを保護します。
+- **PDF暗号化（AES-GCM）**
+- **メタデータの暗号化（デフォルトで有効）**
+- **復号機能**
+- **コマンドラインで簡単操作**
+- **安全なパスワード管理（プロンプト入力対応）**
 
-## インストール
+---
 
-1. debパッケージをダウンロード  
-   [pdfveil_0.1.0-1_all.deb](https://github.com/Saku0512/pdfveil/releases/download/v0.1/pdfveil_0.1.0-1_all.deb)  
-   または、以下のコマンドでダウンロードしてください。  
+## 📦 インストール
+
+1. **debパッケージをダウンロード**  
+   [📎 pdfveil_0.1.0-1_all.deb](https://github.com/Saku0512/pdfveil/releases/download/v0.1/pdfveil_0.1.0-1_all.deb)
+
+   または、以下で取得：
    ```bash
    wget https://github.com/Saku0512/pdfveil/releases/download/v0.1/pdfveil_0.1.0-1_all.deb
    ```
-2. インストール
-   dpkgを使ってインストールしてください。
+
+2. **インストール**
    ```bash
    sudo dpkg -i pdfveil_0.1.0-1_all.deb
    sudo apt install -f
    ```
 
-## 使い方
+---
 
-`pdfveil`は、PDFファイルの暗号化と復号化をコマンドラインから操作できます。
+## 🚀 使い方
 
-### 暗号化
-PDFファイルを暗号化するには、以下のコマンドを使用します
+### 🔐 暗号化
+
 ```bash
 pdfveil encrypt input.pdf [--password password] [--output output] [--force] [--remove] [--no-encrypt-metadata]
 ```
-- encrypt, enc : 暗号化を指定
-- input.pdf : 対象PDF
-- --password, -p : パスワードを指定(省略時はプロンプトで求められる)
-- --output, -o : 出力ファイル名を指定(拡張子は指定不可)
-- --force, -f : 既存ファイルを強制上書きする
-- --remove : 暗号化後に元ファイル(input.pdf)を削除する
-- --not-encrypt-metadata : メタデータを含めて暗号化しない
 
-### 復号
-VEILファイルを復号するには、以下のコマンドを使用します
+#### オプション一覧
+
+| オプション | 説明 |
+|------------|------|
+| `-p`, `--password` | パスワード（省略時はプロンプト） |
+| `-o`, `--output` | 出力ファイル名（拡張子不要） |
+| `-f`, `--force` | 既存ファイルの強制上書き |
+| `--remove` | 元ファイル削除 |
+| `--no-encrypt-metadata` | メタデータを暗号化しない |
+
+---
+
+### 🔓 復号
+
 ```bash
 pdfveil decrypt input.veil [--password password] [--output output] [--force] [--remove]
 ```
-- decrypt, dec : 復号を指定
-- --passwrod, -p : パスワードを指定(省略時はプロンプトで求められる)
-- --output, -o : 出力ファイル名を指定(拡張子は指定不可)
-- --force, -f : 既存ファイルを強制上書きする
-- --remove : 復号後に元ファイル(input.veil)を削除する
 
-## コントリビューション
+| オプション | 説明 |
+|------------|------|
+| `-p`, `--password` | パスワード（省略時はプロンプト） |
+| `-o`, `--output` | 出力ファイル名（拡張子不要） |
+| `-f`, `--force` | 既存ファイルの強制上書き |
+| `--remove` | 元ファイル削除 |
 
-`pdfveil`へのコントリビューションは歓迎します！以下の手順に従って、コントリビュートをお願いします。
+---
 
-### コミット規約
+## 🤝 コントリビューション
 
-- 単一の目的のコミット : 一度のコミットで複数の変更を加えないようにしてください。例えば、バグ修正と機能追加は別々のコミットにしてください。
-- わかりやすいコミットメッセージ : 変更の内容を簡潔に説明してください。
-  - `fix: バグ修正`
-  - `feature: 新機能の追加`
-  - `tests: テストコードの追加・更新`
-  - `ref: リファクタリング`
-  - `docs: ドキュメントの更新`
+**pdfveil** はオープンソースです。改善提案・バグ報告・機能追加、大歓迎です！
 
-### プルリクエストガイドライン
+### ✅ コミットメッセージ規約
 
-1. まずリポジトリをフォークしてローカルにクローンしてください。
-2. 作業用に新しいブランチを作成してください。
+- 目的ごとにコミットを分ける
+- プレフィックス例：
+  - `fix:` バグ修正
+  - `feature:` 新機能追加
+  - `tests:` テスト追加・更新
+  - `ref:` リファクタリング
+  - `docs:` ドキュメント編集
+
+### 🛠 プルリクエスト手順
+
+1. フォークしてクローン
+2. 新ブランチ作成：
    ```bash
    git checkout -b feature/my-new-feature
    ```
-3. 変更を行ったらコミット規則にのっとりコミットしてください。
-4. テスト
-   テストコードを作成・更新して正常に動作することを確かめてください。  
-   テストは以下のコードで行えます。
+3. 作業・コミット
+4. テスト実行：
    ```bash
    pytest tests/
    ```
-6. プッシュ
+5. プッシュ：
    ```bash
    git push origin feature/my-new-feature
    ```
-7. GitHubでプルリクエストを作成し、レビューを依頼してください。
+6. GitHubでPRを作成
 
-## ライセンス
+---
 
-このプロジェクトは[MITライセンス](https://github.com/Saku0512/pdfveil/blob/main/LICENSE)の元で公開しています。
+## 📄 ライセンス
+
+このプロジェクトは [MITライセンス](https://github.com/Saku0512/pdfveil/blob/main/LICENSE) のもとで提供されています。
+
+---
+
+## 🛡 セキュリティに関するお知らせ
+
+セキュリティポリシーはこちらをご覧ください：  
+[🔐 SECURITY.md](https://github.com/Saku0512/pdfveil/blob/main/SECURITY.md)
+
