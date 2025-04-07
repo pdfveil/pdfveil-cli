@@ -8,6 +8,11 @@
 
 # `pdfveil` - PDF暗号化CLIツール
 
+<p align="center">
+  <img src="https://github.com/user-attachments/assets/9c094071-57b5-4224-ac0c-2ff4b7d9d219" alt="ロゴ" width="400px" height="auto">
+</p>
+
+
 PDFVeilは、AES-GCM暗号化を使用してPDFファイルを安全に暗号化および復号化するために設計されたコマンドラインツールです。 また、PDFメタデータを暗号化または非暗号化形式で保存するオプションも提供します。 このツールは、PDF文書を保護するためのシンプルで効率的な方法を提供することを目指しています。
 
 ## 特徴
