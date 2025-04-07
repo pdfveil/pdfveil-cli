@@ -108,6 +108,7 @@ pdfveil decrypt input.veil [--password password] [--output output] [--force] [--
   - `tests:` テスト追加・更新
   - `ref:` リファクタリング
   - `docs:` ドキュメント編集
+  - `build` ビルド関係
 
 ### 🛠 プルリクエスト手順
 
