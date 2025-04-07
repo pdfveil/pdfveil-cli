@@ -2,7 +2,7 @@ Package: pdfveil
 Version: 0.1.0-1
 Architecture: all
 Maintainer: Saku0512 <comonraven113@gmail.com>
-Installed-Size: 92
+Installed-Size: 98
 Depends: python3-pypdf, python3-cryptography (= 43.0.0-1), python3-colorama
 Section: utils
 Priority: optional
