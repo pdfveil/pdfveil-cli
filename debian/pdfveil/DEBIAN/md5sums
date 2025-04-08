@@ -6,7 +6,7 @@ ba1030c48106285a1aab5af7755be634  usr/lib/python3.12/dist-packages/pdfveil-0.1.0
 3ec7514aca8966a30120632ec4072acb  usr/lib/python3.12/dist-packages/pdfveil-0.1.0.dist-info/entry_points.txt
 ce03c5b418abeff463ba81f8552179df  usr/lib/python3.12/dist-packages/pdfveil-0.1.0.dist-info/top_level.txt
 6fae6ed1bbb299df209793045e59fd27  usr/lib/python3.12/dist-packages/pdfveil/__init__.py
-e8250fa2a21f946bff53dde3d1fe4160  usr/lib/python3.12/dist-packages/pdfveil/__pycache__/__init__.cpython-312.pyc
+92c9eb00df4b928fb41acf06120698fc  usr/lib/python3.12/dist-packages/pdfveil/__pycache__/__init__.cpython-312.pyc
 2682c2bba4bb76947f84e630d9fb98e4  usr/lib/python3.12/dist-packages/pdfveil/cli.py
 cd4f45a3696907bf91d4a16e6d8d94c6  usr/lib/python3.12/dist-packages/pdfveil/decryptor.py
 83d11de505bb6c4978581428c1ac9e63  usr/lib/python3.12/dist-packages/pdfveil/encryptor.py
@@ -19,7 +19,7 @@ ba1030c48106285a1aab5af7755be634  usr/lib/python3.13/dist-packages/pdfveil-0.1.0
 3ec7514aca8966a30120632ec4072acb  usr/lib/python3.13/dist-packages/pdfveil-0.1.0.dist-info/entry_points.txt
 ce03c5b418abeff463ba81f8552179df  usr/lib/python3.13/dist-packages/pdfveil-0.1.0.dist-info/top_level.txt
 6fae6ed1bbb299df209793045e59fd27  usr/lib/python3.13/dist-packages/pdfveil/__init__.py
-377a563e50cde7fe388f68036651efbb  usr/lib/python3.13/dist-packages/pdfveil/__pycache__/__init__.cpython-313.pyc
+8399badd3d8157b913aada356f8ec4f3  usr/lib/python3.13/dist-packages/pdfveil/__pycache__/__init__.cpython-313.pyc
 2682c2bba4bb76947f84e630d9fb98e4  usr/lib/python3.13/dist-packages/pdfveil/cli.py
 cd4f45a3696907bf91d4a16e6d8d94c6  usr/lib/python3.13/dist-packages/pdfveil/decryptor.py
 83d11de505bb6c4978581428c1ac9e63  usr/lib/python3.13/dist-packages/pdfveil/encryptor.py
@@ -27,3 +27,4 @@ cd4f45a3696907bf91d4a16e6d8d94c6  usr/lib/python3.13/dist-packages/pdfveil/decry
 f12d98dbc00fbb4f47c60b820840895b  usr/lib/python3.13/dist-packages/pdfveil/utils.py
 907a9df84bc1fd547c0f818002098ca7  usr/share/doc/pdfveil/changelog.Debian.gz
 310c663b8d5f7ed01e1989725ef10426  usr/share/doc/pdfveil/copyright
+7fa0c1878a6694025200bd0057e9b53e  usr/share/man/man1/pdfveil.1.gz
