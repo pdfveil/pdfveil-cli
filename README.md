@@ -103,15 +103,17 @@ pdfveil decrypt input.veil [--password password] [--output output] [--force] [--
    git checkout -b feature/my-new-feature
    ```
 3. 作業・コミット
-4. テスト実行：
+4. テストコード作成  
+   追加した機能が実際に動くか確かめるために`/tests`にテストコードを作成してください。
+6. テスト実行：
    ```bash
    pytest tests/
    ```
-5. プッシュ：
+7. プッシュ：
    ```bash
    git push origin feature/my-new-feature
    ```
-6. GitHubでPRを作成
+8. GitHubでPRを作成
 
 ---
 
