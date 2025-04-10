@@ -6,3 +6,9 @@ export DEB_LDFLAGS = -Wl,-z,relro -Wl,-z,now
 
 %:
 	dh $@ --with python3 --buildsystem=pybuild
+
+override_dh_install:
+	dh_install
+	mkdir -p debian/pdfveil/usr/share/pdfveil
+	cp ./pdfveil.magic debian/pdfveil/usr/share/pdfveil/pdfveil_magic
+	file -C -m debian/pdfveil/usr/share/pdfveil/pdfveil_magic > debian/pdfveil/usr/share/pdfveil/pdfveil.mgc
