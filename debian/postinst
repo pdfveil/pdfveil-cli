@@ -1,0 +1,16 @@
+#!/bin/sh
+set -e
+
+# pdfveil の magic ファイルがインストールされていることを確認
+if [ -f /usr/share/file/magic.mgc ] && [ -f /usr/share/pdfveil/pdfveil_magic ]; then
+    echo "ファイルが存在します。" >> /tmp/postinst_log.txt
+    # ユーザーの ~/.bashrc に alias を設定する
+    echo "alias file='file -m /usr/share/file/magic.mgc -m /usr/share/pdfveil/pdfveil_magic'" >> /home/$SUDO_USER/.bashrc
+else
+    echo "ファイルが見つかりません。" >> /tmp/postinst_log.txt
+fi
+
+# 新しい設定を反映させるためにシェルを再読み込み
+if [ -f /home/$SUDO_USER/.bashrc ]; then
+    . /home/$SUDO_USER/.bashrc
+fi
