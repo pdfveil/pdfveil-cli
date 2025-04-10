@@ -72,6 +72,7 @@ def encrypt_pdf(input_path: str, password: str, output_path: str = None, force: 
         return
 
     with open(output_path, "wb") as f:
+        f.write(b"VEIL")  # Add VEIl marker
         f.write(flag)
         f.write(salt)
         if encrypt_metadata:
