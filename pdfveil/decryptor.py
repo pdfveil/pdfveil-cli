@@ -43,6 +43,9 @@ def is_valid_pdf(file_path: str) -> bool:
     try:
         with open(file_path, "rb") as f:
             header = f.read(5)
+            if header == b"VEIL":
+                # VEILマーカーをスキップして次の5文字を確認
+                header = f.read(5)
             return header == b"%PDF-"
     except Exception:
         return False
@@ -60,6 +63,12 @@ def decrypt_pdf(input_path: str, password: str, output_path: str = None, force: 
         encrypted_data = f.read()
     
     offset = 0
+
+    # Check and remove VEIL marker
+    if not encrypted_data.startswith(b"VEIL"):
+        print("[!] Invalid file format: Missing VEIL marker.")
+        return
+    offset += 4  # Skip VEIL marker
     
     # 2. フラグを読み取り
     flag = encrypted_data[offset]

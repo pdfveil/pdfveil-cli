@@ -12,7 +12,7 @@ PASSWORD = "testpassword"
 
 def setup_module(module):
     # 暗号化して .veil を用意
-    encrypt_pdf(TEST_PDF, PASSWORD, output_path=ENCRYPTED_FILE, force=True, skip_strength_check=True)
+    encrypt_pdf(TEST_PDF, PASSWORD, output_path=ENCRYPTED_FILE, force=True, skip_strength_check=True, encrypt_metadata=True)
 
 def teardown_module(module):
     # テスト後のクリーンアップ
