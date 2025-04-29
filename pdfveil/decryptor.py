@@ -1,170 +1,107 @@
-# pdfveil/decryptor.py
-# encrypted metadata false
-# [salt(16)][iv(12)][ciphertext(?)][tag(16)]
-# encrypted metadata true
-# [flag(1)][salt(16)][metadata_iv(12)][metadata_ciphertext][metadata_tag(16)][iv(12)][ciphertext][tag(16)]
-from .utils import derive_key
-from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
-import sys
 import os
 import struct
-import re
-from datetime import datetime, timedelta
-import json
+import sys
+import hmac
+import hashlib
+from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
+from .utils import derive_key
+from io import BytesIO
+from pypdf import PdfReader, PdfWriter
 
-def parse_pdf_date(pdf_date_str: str) -> str:
-    """PDF日付文字列（例: D:20250404160638+00'00'）を整形"""
-    match = re.match(r"D:(\d{4})(\d{2})(\d{2})(\d{2})(\d{2})(\d{2})([+-Z])?(\d{2})?'?(\d{2})?'?", pdf_date_str)
-    if not match:
-        return pdf_date_str  # フォーマット不明ならそのまま
-
-    year, month, day, hour, minute, second, tz_sign, tz_hour, tz_minute = match.groups()
-    dt = datetime(int(year), int(month), int(day), int(hour), int(minute), int(second))
-
-    # タイムゾーンの調整（現状は JST 固定にする）
-    jst = dt + timedelta(hours=9)
-    return jst.strftime("%a %b %d %H:%M:%S %Y JST")
-
-def print_formatted_metadata(meta_dict: dict):
-    """整形してメタデータを出力"""
-    print("[*] Metadata")
-    for key in sorted(meta_dict.keys()):
-        clean_key = key.strip("/")
-
-        value = meta_dict[key]
-        if "Date" in clean_key and isinstance(value, str):
-            value = parse_pdf_date(value)
-
-        print(f"{clean_key+':':<16}{value}")
-    print("")
-
-def is_valid_pdf(file_path: str) -> bool:
-    """PDFファイルかどうかを確認する"""
-    try:
-        with open(file_path, "rb") as f:
-            header = f.read(5)
-            if header == b"VEIL":
-                # VEILマーカーをスキップして次の5文字を確認
-                header = f.read(5)
-            return header == b"%PDF-"
-    except Exception:
-        return False
-
-def decrypt_pdf(input_path: str, password: str, output_path: str = None, force: bool = False):
-    """AES-GCMで暗号化されたPDFを復号して保存"""
-    
-    # 0. 入力ファイルの拡張子チェック
-    if not input_path.lower().endswith(".veil"):
-        print(f"[!] 入力ファイルはVEIL (.veil) 形式である必要があります。")
-        sys.exit(1)
-
-    # 1. 暗号化されたファイルを読み込み
+def decrypt_pdf(input_path: str, password: str, output_path: str = None, force: bool = False, skip_strength_check=False):
     with open(input_path, "rb") as f:
-        encrypted_data = f.read()
-    
-    offset = 0
+        magic = f.read(4)
+        if magic != b"VEIL":
+            raise ValueError("無効なVEILファイル: magicヘッダーが見つかりません")
+        
+        version = f.read(1)
+        if version != b"\x01":
+            raise ValueError(f"未対応のバージョン: {version.hex()}")
 
-    # Check and remove VEIL marker
-    if not encrypted_data.startswith(b"VEIL"):
-        print("[!] Invalid file format: Missing VEIL marker.")
-        return
-    offset += 4  # Skip VEIL marker
-    
-    # 2. フラグを読み取り
-    flag = encrypted_data[offset]
-    offset += 1
-    
-    # 3. ソルトを抽出
-    salt = encrypted_data[offset:offset+16]
-    offset += 16
+        flag = f.read(1)
 
-    # 3. 鍵を導出
-    key = derive_key(password, salt, mode='dec', file=input_path)
+        encrypt_metadata = flag == b'\x01'
 
-    try:
-        if flag == 0x00:
-            # メタデータなし構造: [flag][salt][iv][ciphertext][tag]
-            iv = encrypted_data[offset:offset+12]
-            offset += 12
-            tag = encrypted_data[-16:]
-            ciphertext = encrypted_data[offset:-16]
-        elif flag == 0x01:
-            # メタデータあり構造
-            # [flag][salt][metadata_iv][metadata_length][metadata_ciphertext][metadata_tag][iv][ciphertext][tag]
-            metadata_iv = encrypted_data[offset:offset+12]
-            offset += 12
-            
-            # メタデータの長さが不明なので、末尾の[iv+ciphertext][tag(16)]を逆から読む
-            # -> tag(16) + iv(12)は固定 -> 残りがmetadata_ciphertxt ; metadata_tag
-            metadata_len = struct.unpack(">I", encrypted_data[offset:offset+4])[0]
-            offset += 4
-            
-            metadata_ciphertext = encrypted_data[offset:offset+ metadata_len]
-            offset += metadata_len
-            
-            metadata_tag = encrypted_data[offset:offset+16]
-            offset += 16
-            
-            # メタデータ復号(今は表示だけ。利用しない)
-            cipher_meta = Cipher(algorithms.AES(key), modes.GCM(metadata_iv, metadata_tag))
-            decryptor_meta = cipher_meta.decryptor()
-            try:
-                metadata_plan = decryptor_meta.update(metadata_ciphertext) + decryptor_meta.finalize()
-    
-                try:
-                    meta_dict = json.loads(metadata_plan.decode("utf-8"))
-                except json.JSONDecodeError as e:
-                    print(f"[!] メタデータの解析に失敗しました（JSON形式が正しくありません）: {e}")
-                    return
+        # --- メタデータ処理 ---
+        meta_data = b""
+        if encrypt_metadata:
+            meta_salt = f.read(16)
+            metadata_iv = f.read(12)
+            metadata_len = struct.unpack(">I", f.read(4))[0]
+            metadata_ciphertext = f.read(metadata_len)
+            metadata_tag = f.read(16)
+            meta_key = derive_key(password, meta_salt, mode='dec', file=input_path, skip_strength_check=skip_strength_check)
 
-                print_formatted_metadata(meta_dict)
-            except Exception as e:
-                print(f"[!] メタデータの復号に失敗しました: {e}")
-                return
+            cipher = Cipher(algorithms.AES(meta_key), modes.GCM(metadata_iv, metadata_tag))
+            decryptor = cipher.decryptor()
+            meta_data = decryptor.update(metadata_ciphertext) + decryptor.finalize()
 
         else:
-            print("[!] 不明なフラグです。ファイルが破損している可能性があります。")
-            return
+            meta_salt = f.read(16)
+            metadata_len = struct.unpack(">I", f.read(4))[0]
+            meta_data = f.read(metadata_len)
+            hmac_tag = f.read(32)
+            meta_key = derive_key(password, meta_salt, mode='dec', file=input_path, skip_strength_check=skip_strength_check)
+            expected_tag = hmac.new(meta_key, meta_data, hashlib.sha256).digest()
+            if not hmac.compare_digest(hmac_tag, expected_tag):
+                raise ValueError("メタデータのHMAC検証に失敗しました。パスワードが間違っている可能性があります。")
 
-        iv = encrypted_data[offset:offset+12]
-        offset += 12
-        tag = encrypted_data[-16:]
-        ciphertext = encrypted_data[offset:-16]
-        try:
-            cipher = Cipher(algorithms.AES(key), modes.GCM(iv, tag))
-            decryptor = cipher.decryptor()
-            decrypted_data = decryptor.update(ciphertext) + decryptor.finalize()
-        except Exception as e:
-            print(f"[!] 復号に失敗しました。パスワードが間違っているか、ファイルが破損している可能性があります。")
-            return
-    except Exception as e:
-        print(f"[!] パスワードが間違っているか、ファイルが破損しています。ファイル '{input_path}' は復号できません。")
-        return  # パスワードが間違っている場合は復号せずスキップ
-    
-    temp_output_path = "temp_decrypted_output.pdf"
-    with open(temp_output_path, "wb") as f:
-        f.write(decrypted_data)
+        # --- 本体データ処理 ---
+        body_salt = f.read(16)
+        iv = f.read(12)
+        cipher_len = struct.unpack(">I", f.read(4))[0]
+        ciphertext = f.read(cipher_len)
+        tag = f.read(16)
 
-    if not is_valid_pdf(temp_output_path):
-        os.remove(temp_output_path)  # 検証用ファイルを削除
-        print("[!] 復号したファイルはPDF形式ではありません。整合性が取れていません。")
-        return
+        body_key = derive_key(password, body_salt, mode='dec', file=input_path, skip_strength_check=skip_strength_check)
+        cipher = Cipher(algorithms.AES(body_key), modes.GCM(iv, tag))
+        decryptor = cipher.decryptor()
+        pdf_body = decryptor.update(ciphertext) + decryptor.finalize()
 
-    # 5. 出力ファイルに保存
+    # --- 出力ファイル名決定 ---
     if not output_path:
         base = os.path.splitext(input_path)[0]
         output_path = base + ".pdf"
-    else:
-        base = os.path.splitext(output_path)[0]
-        output_path = base + ".pdf"
-    
-    os.remove(temp_output_path)  # 一時ファイルを削除
-    
-    if os.path.exists(output_path) and not force:
-        print(f"[!] 出力先ファイル '{output_path}' は既に存在します。--force を指定して上書きできます。")
-        return
 
-    with open(output_path, "wb") as f:
-        f.write(decrypted_data)
+    if os.path.exists(output_path) and not force:
+        raise ValueError(f"[!] 出力ファイル '{output_path}' は既に存在します。--force を指定して上書きできます。")
+
+    # --- PDFの再構築 ---
+    # 1. ボディをPDFとしてロード
+    body_reader = PdfReader(BytesIO(pdf_body))
+    writer = PdfWriter()
+
+    for page in body_reader.pages:
+        writer.add_page(page)
+
+    # 2. メタデータ再追加
+    if encrypt_metadata:
+        # 暗号化されていた場合 -> ヘッダーとInfoオブジェクトを復元
+        with open(output_path, "wb") as f:
+            f.write(meta_data)
+            buffer = BytesIO()
+            writer.write(buffer)
+            f.write(buffer.getvalue())
+    else:
+        # 平文で含まれていた場合 -> PdfWriter のAPIで設定
+        from pypdf.generic import NameObject, create_string_object
+        try:
+            header_end = meta_data.index(b"\n<<")
+            meta_dict_raw = meta_data[header_end+1:-len(">>\nendobj\n")]
+            lines = meta_dict_raw.split(b"\n")
+            info_dict = {}
+            for line in lines:
+                if b"(" in line and b")" in line:
+                    key, val = line.split(b"(", 1)
+                    key = key.strip().decode("utf-8")
+                    val = val.rstrip(b")").decode("utf-8")
+                    info_dict[NameObject(key)] = create_string_object(val)
+
+            writer.add_metadata(info_dict)
+        except Exception as e:
+            print(f"[!] メタデータの解析に失敗しましたが、PDF本体は復元できます: {e}")
+
+        with open(output_path, "wb") as f:
+            writer.write(f)
 
     print(f"[+] Decrypted and saved to: {output_path}")
