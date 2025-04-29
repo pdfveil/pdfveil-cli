@@ -131,13 +131,17 @@ def encrypt_pdf(input_path: str, password: str, output_path: str = None, force: 
     tag = encryptor.tag  # 認証タグ（16バイト）
 
     # 6. 暗号化ファイルに [salt][iv][metadata][ciphertext][tag] を保存
-    if input_path.lower().endswith(".pdf"):
-        base = input_path[:-4]
+    if output_path is None:
+        if input_path.lower().endswith(".pdf"):
+            base = input_path[:-4]
+        else:
+            base = os.path.splitext(input_path)[0]
+        output_path = base
     else:
-        base = os.path.splitext(input_path)[0]
-    output_path = base + ".veil"
+        output_path = os.path.splitext(output_path)[0]  # 拡張子除去
 
-    
+    output_path += ".veil"
+
     if os.path.exists(output_path) and not force:
         raise ValueError(f"[!] 出力先ファイル '{output_path}' は既に存在します。--force を指定して上書きできます。")
 
