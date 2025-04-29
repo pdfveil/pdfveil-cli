@@ -3,10 +3,11 @@ import os
 import struct
 import hmac
 import hashlib
+import getpass
 from pypdf import PdfReader, PdfWriter
 from pypdf.generic import IndirectObject
 from io import BytesIO
-from .utils import generate_salt, derive_key
+from .utils import generate_salt, derive_key, is_strong_password
 from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
 
 def extract_info_object_source(reader: PdfReader, info_ref: IndirectObject) -> bytes:
@@ -88,8 +89,25 @@ def encrypt_pdf(input_path: str, password: str, output_path: str = None, force: 
     # 2. ソルト & 鍵生成
     body_salt = generate_salt()
     meta_salt = generate_salt()
-    body_key = derive_key(password, body_salt, mode='enc', file=input_path, skip_strength_check=skip_strength_check)
-    meta_key = derive_key(password, meta_salt, mode='enc', file=input_path, skip_strength_check=skip_strength_check)
+    
+    # パスワードチェック（1回だけ）
+    if not skip_strength_check and not is_strong_password(password):
+        while True:
+            user_response = input(f"[!] {input_path}に設定したパスワードが強力ではありませんが、このまま暗号化しますか？ (Yes/No): ").strip().lower()
+            if user_response == 'yes':
+                break
+            elif user_response == 'no':
+                password = getpass.getpass("🔑 Enter password: ")
+                if is_strong_password(password):
+                    break
+                else:
+                    print("[!] 強力なパスワードが必要です。再度入力してください。")
+            else:
+                print("[!] 'Yes' か 'No' を入力してください。")
+
+
+    body_key = derive_key(password, body_salt, mode='enc', file=input_path, skip_strength_check=True)
+    meta_key = derive_key(password, meta_salt, mode='enc', file=input_path, skip_strength_check=True)
 
     # 3. IV生成（GCM推奨：12バイト）
     metadata_iv = b""
