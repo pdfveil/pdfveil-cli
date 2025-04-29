@@ -42,10 +42,6 @@ def extract_pdf_metadata(file_path: str) -> bytes:
 
     metadata_obj = extract_info_object_source(reader, info_ref)
 
-    # 任意：中身を保存して確認したいなら
-    with open("metadata.txt", "wb") as metadata_file:
-        metadata_file.write(header_bytes + metadata_obj)
-
     return header_bytes + metadata_obj
 
 def extract_body_without_metadata(input_path: str) -> bytes:
