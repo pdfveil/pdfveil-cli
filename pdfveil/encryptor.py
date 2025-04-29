@@ -1,6 +1,5 @@
 # pdfveil/encryptor.py
 import os
-import sys
 import struct
 import hmac
 import hashlib
@@ -79,8 +78,7 @@ def encrypt_pdf(input_path: str, password: str, output_path: str = None, force: 
     """PDFファイルをAES-GCMで暗号化し、.veilとして保存"""
     
     if not input_path.lower().endswith(".pdf"):
-        print(f"[!] 入力ファイルはPDF (.pdf) 形式である必要があります。")
-        sys.exit(1)
+        raise ValueError(f"[!] 入力ファイルはPDF (.pdf) 形式である必要があります。")
     
     # 1. PDFを読み込み
     with open(input_path, "rb") as f:
@@ -89,7 +87,7 @@ def encrypt_pdf(input_path: str, password: str, output_path: str = None, force: 
 
     # 2. ソルト & 鍵生成
     body_salt = generate_salt()
-    meta_salt = generate_salt() if encrypt_metadata else b""
+    meta_salt = generate_salt()
     body_key = derive_key(password, body_salt, mode='enc', file=input_path, skip_strength_check=skip_strength_check)
     meta_key = derive_key(password, meta_salt, mode='enc', file=input_path, skip_strength_check=skip_strength_check)
 
@@ -127,8 +125,7 @@ def encrypt_pdf(input_path: str, password: str, output_path: str = None, force: 
 
     
     if os.path.exists(output_path) and not force:
-        print(f"[!] 出力先ファイル '{output_path}' は既に存在します。--force を指定して上書きできます。")
-        return
+        raise ValueError(f"[!] 出力先ファイル '{output_path}' は既に存在します。--force を指定して上書きできます。")
 
     with open(output_path, "wb") as f:
         # [magic(4)][flag(1)][meta_length(4)][metadata_raw(?)][salt(16)][iv(12)][cipher_length(4)][ciphertext(?)][tag(16)]
@@ -143,6 +140,7 @@ def encrypt_pdf(input_path: str, password: str, output_path: str = None, force: 
             f.write(metadata_ciphertext)
             f.write(metadata_tag)
         else:
+            f.write(meta_salt)
             meta_length = len(meta_data)
             f.write(struct.pack(">I", meta_length))
             f.write(meta_data)
@@ -167,6 +165,6 @@ def encrypt_pdf(input_path: str, password: str, output_path: str = None, force: 
     if flag==0x01:
         [meta_salt(16)][meta_iv(12)][meta_len(4)][meta_ciphertext(?)][meta_tag(16)]
     else:
-        [meta_len(4)][meta_plaintext(?)][meta_hmac(32)]
+        [meta_salt(16)][meta_len(4)][meta_plaintext(?)][meta_hmac(32)]
     [body_salt(16)][iv(12)][cipher_len(4)][ciphertext(?)][tag(16)]
 """
