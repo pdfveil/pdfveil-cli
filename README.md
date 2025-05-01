@@ -30,16 +30,16 @@
 ## 📦 インストール
 
 1. **debパッケージをダウンロード**  
-   [📎 pdfveil_0.1.0-1_all.deb](https://github.com/Saku0512/pdfveil/releases/download/v0.1/pdfveil_0.1.0-1_all.deb)
+   [📎 pdfveil_0.1.0-1_all.deb](https://github.com/Saku0512/pdfveil/releases/download/v0.2/pdfveil_0.2.0-1_all.deb)
 
    または、以下で取得：
    ```bash
-   wget https://github.com/Saku0512/pdfveil/releases/download/v0.1/pdfveil_0.1.0-1_all.deb
+   wget https://github.com/Saku0512/pdfveil/releases/download/v0.2/pdfveil_0.2.0-1_all.deb
    ```
 
 2. **インストール**
    ```bash
-   sudo dpkg -i pdfveil_0.1.0-1_all.deb
+   sudo dpkg -i pdfveil_0.2.0-1_all.deb
    sudo apt install -f
    ```
 
