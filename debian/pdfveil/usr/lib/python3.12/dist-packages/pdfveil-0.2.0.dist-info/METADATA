@@ -1,6 +1,6 @@
 Metadata-Version: 2.1
 Name: pdfveil
-Version: 0.1.0
+Version: 0.2.0
 Summary: CLI tool for encrypting and decrypting PDF files
 Author-email: Saku0512 <comonraven113@gmail.com>
 License: MIT
